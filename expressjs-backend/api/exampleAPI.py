@@ -4,11 +4,9 @@ from src.api import auth
 import sqlalchemy
 from src import database as db
 
-# anything in all caps is variable
-
 router = APIRouter(
-  prefix="/CALLEDENDPOINT",
-  tags=["CALLEDENDPOINT"],
+  prefix="/users",
+  tags=["users"],
   dependencies=[Depends(auth.get_api_key)]
 )
 
