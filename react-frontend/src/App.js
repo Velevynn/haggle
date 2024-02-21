@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import SignUpPage from './Authentication/SignUpPage';
+import Marketplace from './pages/Marketplace';
+import NavBar from './components/NavBar';
 import Form from "./Form";
 import Table from "./Table";
 import axios from "axios";
@@ -63,22 +65,9 @@ function App() {
   }
 
   return (
-    <div className="container">
-      <h1>Choose your Path!</h1>
+    <div className="container"> 
       <BrowserRouter basename="/">
-        <nav>
-          <ul>
-            <li>
-              <Link to="/SignUpPage">Sign Up</Link>
-            </li>
-            <li>
-              <Link to="/Form">Create a listing</Link>
-            </li>
-            <li>
-              <Link to="/">Listings</Link>
-            </li>
-          </ul>
-        </nav>
+        <NavBar />
         <Routes>
           <Route 
             path="/" 
@@ -94,6 +83,11 @@ function App() {
           <Route path="/form" element={<Form 
           handleSubmit = {updateList} 
           />} />
+          <Route 
+            path = "/marketplace"
+            element = {<Marketplace />}
+          />
+
         </Routes>
       </BrowserRouter>
     </div>
