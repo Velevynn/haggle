@@ -1,4 +1,4 @@
-// NavBar.js
+// NavBar.js (Josh)
 
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -14,9 +14,6 @@ function NavBar() {
       <ul style={{ listStyleType: 'none', margin: 0, padding: 0, display: 'flex', alignItems: 'center', fontFamily: 'inter, sans-serif'}}>
         <li style={{ margin: '0 10px' }}>
           <Link to="/about">About</Link>
-        </li>
-        <li style={{ margin: '0 10px' }}>
-          <Link to="/services">Services</Link>
         </li>
         <li style={{ margin: '0 10px' }}>
           <Link to="/marketplace">Marketplace</Link>

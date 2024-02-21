@@ -4,7 +4,7 @@ import SignUpPage from './Authentication/SignUpPage';
 import Marketplace from './pages/Marketplace';
 import AddListing from './pages/AddListing'
 import NavBar from './components/NavBar';
-import axios from "axios";
+import About from './pages/About';
 
 function App() {
 
@@ -20,9 +20,7 @@ function App() {
           />
           <Route 
             path = "/about"
-          />
-          <Route 
-            path = "/services"
+            element={<About />}
           />
           <Route 
             path = "/"

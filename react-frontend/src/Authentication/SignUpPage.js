@@ -1,5 +1,4 @@
-// SignUpPage.js
-// author: Alex
+// SignUpPage.js (Alex)
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -12,6 +11,7 @@ const Container = styled.div`
   margin: 0 auto;
   padding: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  font-family: Inter, sans-serif;
 `;
 
 const Title = styled.h2`
