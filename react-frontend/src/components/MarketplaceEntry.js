@@ -1,5 +1,5 @@
 import React from "react";
-import './components.css';
+import './marketplace-entry.css';
 import missing from '../resources/missing.jpg';
 
 

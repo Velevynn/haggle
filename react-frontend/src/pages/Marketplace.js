@@ -27,7 +27,6 @@ function Marketplace() {
     {entries.map(entry => (
       <Entry
           title={entry.title}
-          description={entry.description}
           price={entry.price}
         />
       ))}
