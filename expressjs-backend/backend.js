@@ -2,6 +2,9 @@ const express = require('express');
 const app = express();
 const mysql = require('mysql2/promise');
 
+
+const PORT = 3000;
+
 // Database configuration
 const dbConfig = {
   host: 'localhost',
@@ -159,6 +162,10 @@ app.post('/users/register', async (req, res) => {
     console.error('Error registering user:', error);
     res.status(500).json({ error: 'Failed to register user' }); // Send error response
   }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
 
 module.exports = app;
