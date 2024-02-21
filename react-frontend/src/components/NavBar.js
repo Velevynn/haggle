@@ -22,10 +22,10 @@ function NavBar() {
           <Link to="/marketplace">Marketplace</Link>
         </li>
         <li style={{ margin: '0 10px' }}>
-          <Link to="/">My Profile</Link>
+          <Link to="/sign-up">My Profile</Link>
         </li>
         <li style={{ margin: '0 10px' }}>
-          <Link to="/" style = {{padding: '10px 10px', backgroundColor: 'green', color: 'white', borderRadius: '7px'}}>Post a Listing</Link>
+          <Link to="/new-listing" style = {{padding: '10px 10px', backgroundColor: 'green', color: 'white', borderRadius: '7px'}}>Post a Listing</Link>
         </li>
       </ul>
     </nav>

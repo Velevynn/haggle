@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import SignUpPage from './Authentication/SignUpPage';
 import Marketplace from './pages/Marketplace';
+import AddListing from './pages/AddListing'
 import NavBar from './components/NavBar';
 import axios from "axios";
 
@@ -20,6 +21,10 @@ function App() {
           <Route 
             path = "/marketplace"
             element = {<Marketplace />}
+          />
+          <Route 
+            path = "/new-listing"
+            element = {<AddListing />}
           />
 
         </Routes>
