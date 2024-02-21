@@ -70,7 +70,7 @@ function App() {
         <NavBar />
         <Routes>
           <Route 
-            path="/" 
+            path="/listings" 
             element={<Table
               characterData={listings}
               removeCharacter={removeOneListing}

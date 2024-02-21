@@ -1,14 +1,15 @@
 // Marketplace.js
 import React from 'react';
-import axios from 'axios';
+import './pages.css';
 
 function Marketplace() {
   return (
-    <div>
-      <h2>Marketplace</h2>
-      <p>Welcome to the marketplace!</p>
-      {/* Add your marketplace content here */}
+
+    <div style={{margin: '25px'}}>
+      <h style={{ fontFamily: 'Newsreader, serif', fontSize: '3rem'}}>Marketplace</h>
+      <div className="divider"></div>
     </div>
+    
   );
 }
 
