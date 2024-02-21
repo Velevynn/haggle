@@ -29,8 +29,10 @@ function Form() {
   }
 
   function submitForm() {
-    handleSubmit(listing);
-    setListing({ title: "", description: "", price: "" });
+    if (listing.price !== "" && listing.description !== "" && listing.price !== "") {
+        handleSubmit(listing);
+        window.location.href = '/marketplace';
+    }
   }
 
   return (
