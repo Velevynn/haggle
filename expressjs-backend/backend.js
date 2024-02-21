@@ -1,9 +1,11 @@
 const express = require('express');
 const app = express();
 const mysql = require('mysql2/promise');
+const cors = require('cors');
+const PORT = 6969;
 
-
-const PORT = 3000;
+app.use(cors());
+app.use(express.json()); // This is crucial for parsing JSON bodies
 
 // Database configuration
 const dbConfig = {
@@ -105,65 +107,41 @@ async function setupDatabase() {
   }
 }
 
-setupDatabase();
+app.post('/users/register', async (req, res) => {
+  const { username, full_name, password, email, phoneNum: phoneNumber } = req.body;
 
-// Async function to check if a user already exists
-async function checkIfUserExists(username, email, phoneNumber) {
   try {
     const connection = await mysql.createConnection(dbConfig);
 
-    // Check if the provided username, email, or phone number already exists
-    const [rows] = await connection.execute('SELECT * FROM users WHERE username = ? OR email = ? OR phoneNumber = ?', [username, email, phoneNumber]);
+    // Check if user already exists
+    const [users] = await connection.execute(
+      'SELECT * FROM users WHERE username = ? OR email = ? OR phoneNumber = ?',
+      [username, email, phoneNumber]
+    );
 
-    // Close the connection
-    await connection.end();
-
-    // Return true if any user with the provided username, email, or phone number exists
-    return rows.length > 0;
-  } catch (error) {
-    console.error("An error occurred while checking if the user exists:", error);
-    throw error;
-  }
-}
-
-// Async function to register a new user
-async function registerUser(user) {
-  try {
-    const connection = await mysql.createConnection(dbConfig);
-
-    // Check if the user already exists
-    const userExists = await checkIfUserExists(user.username, user.email, user.phoneNumber);
-
-    if (userExists) {
-      throw new Error('User with provided username, email, or phone number already exists');
+    if (users.length > 0) {
+      // If user exists, send an error response
+      await connection.end();
+      return res.status(409).json({ error: 'User with provided username, email, or phone number already exists' });
     }
 
-    // Insert the new user into the users table
-    await connection.execute('INSERT INTO users (username, full_name, password, email, phoneNumber) VALUES (?, ?, ?, ?, ?)', [user.username, user.full_name, user.password, user.email, user.phoneNumber]);
+    // If user does not exist, insert new user
+    await connection.execute(
+      'INSERT INTO users (username, full_name, password, email, phoneNumber) VALUES (?, ?, ?, ?, ?)',
+      [username, full_name, password, email, phoneNumber]
+    );
 
-    // Close the connection
     await connection.end();
-
-    // Return success message or any other data if needed
-    return { success: true, message: 'User registered successfully' };
-  } catch (error) {
-    console.error("An error occurred while registering the user:", error);
-    throw error;
-  }
-}
-
-app.post('/users/register', async (req, res) => {
-  try {
-    const { username, full_name, password, email, phoneNum } = req.body;
-    // Call the registerUser function passing user data
-    const result = await registerUser({ username, full_name, password, email, phoneNumber: phoneNum });
-    res.status(201).json(result); // Send success response
+    res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
     console.error('Error registering user:', error);
-    res.status(500).json({ error: 'Failed to register user' }); // Send error response
+    res.status(500).json({ error: 'Failed to register user' });
   }
 });
 
+setupDatabase();
+
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
