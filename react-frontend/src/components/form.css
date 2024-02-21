@@ -44,4 +44,12 @@
     width: calc(50% - 5px); /* Smaller price box */
     display: inline-block;
   }
-  
+
+  .form-container #submit-button {
+    background-color: green;
+    color: white; /* Optionally, set text color to white for better contrast */
+    border: none; /* Optionally, remove border for a cleaner look */
+    padding: 10px 20px; /* Adjust padding as needed */
+    border-radius: 5px; /* Optionally, add border-radius for rounded corners */
+    cursor: pointer; /* Show pointer cursor on hover */
+  }

@@ -66,7 +66,7 @@ function Form() {
           onChange={handleChange}
         />
 
-        <input type="button" value="Post Listing" onClick={submitForm} />
+        <input type="button" value="Post Listing" onClick={submitForm} style = {{backgroundColor: "#426B1F"}} />
       </form>
     </div>
   );

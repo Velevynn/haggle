@@ -1,44 +1,164 @@
-const express = require("express");
+const express = require('express');
 const app = express();
-const port = 8000;
-const uuid = require("uuid");
-const cors = require("cors");
-
+const mysql = require('mysql2/promise');
+const cors = require('cors');
+const PORT = 8000;
 app.use(cors());
-
-app.use(express.json());
-
-const entries = {
-  entry_list: [
-    {
-      id: 'xyz123',
-      title: "Untitled",
-      description: "No Description.",
-      price: "0",
-    },
-  ],
+app.use(express.json()); // This is crucial for parsing JSON bodies
+// Database configuration
+const dbConfig = {
+  host: 'localhost',
+  user: 'root', // Use your MySQL username
+  password: '', // Use your MySQL password
+  database: 'haggle_db' // Specify the database name
 };
-
-app.get("/listings", (req, res) => {
-  res.send(entries);
-});
-
-app.post("/listings", (req, res) => {
-  const entryToAdd = req.body;
-  entryToAdd["id"] = gen_random_id();
-  addEntry(entryToAdd);
-  res.status(201).send(entryToAdd);
-});
-
-function addEntry(entry) {
-  entries["entry_list"].push(entry);
+// Async function to establish database connection, create a database, and add tables
+async function setupDatabase() {
+  try {
+    const connection = await mysql.createConnection(dbConfig);
+    // Create a new database
+    await connection.query("CREATE DATABASE IF NOT EXISTS haggle_db");
+    console.log("Database created or already exists.");
+    // Use the newly created database
+    await connection.query("USE haggle_db");
+    // Create users table
+     await connection.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        userID INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(255) NOT NULL UNIQUE, -- Ensure username is unique
+        full_name VARCHAR(255) NOT NULL,
+        password VARCHAR(255) NOT NULL, -- Consider hashing passwords for security
+        email VARCHAR(255) NOT NULL UNIQUE, -- Ensure email is unique and not null
+        phoneNumber VARCHAR(20) NOT NULL UNIQUE, -- Ensure phoneNumber is unique and not null
+        joinedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    `);
+    console.log("Table 'users' created or already exists.");
+    // Create the "Listing" table
+     await connection.query(`
+      CREATE TABLE IF NOT EXISTS listings (
+        listingID INT AUTO_INCREMENT PRIMARY KEY,
+        userID INT NOT NULL, -- Link to users table
+        name VARCHAR(255) NOT NULL,
+        price DECIMAL(10, 2) NOT NULL,
+        description TEXT,
+        postDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        expirationDate TIMESTAMP,
+        bookmarkCount INT DEFAULT 0,
+        quantity INT NOT NULL,
+        FOREIGN KEY (userID) REFERENCES users(userID) -- Foreign key to reference users
+      );
+    `);
+    console.log("Table 'listings' created or already exists.");
+     await connection.query(`
+      CREATE TABLE IF NOT EXISTS transactions (
+        transactionID INT AUTO_INCREMENT PRIMARY KEY,
+        buyerID INT NOT NULL,
+        sellerID INT NOT NULL,
+        listingID INT NOT NULL,
+        transactionDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        amount DECIMAL(10, 2) NOT NULL,
+        FOREIGN KEY (buyerID) REFERENCES users(userID),
+        FOREIGN KEY (sellerID) REFERENCES users(userID),
+        FOREIGN KEY (listingID) REFERENCES listings(listingID)
+      );
+    `);
+    console.log("Table 'transactions' created or already exists.");
+     await connection.query(`
+      CREATE TABLE IF NOT EXISTS listingsDetails (
+        detailsID INT AUTO_INCREMENT PRIMARY KEY,
+        sellerID INT NOT NULL,
+        listingID INT NOT NULL,
+        location VARCHAR(255) NOT NULL,
+        isBookmarked BOOLEAN DEFAULT FALSE,
+        FOREIGN KEY (sellerID) REFERENCES users(userID),
+        FOREIGN KEY (listingID) REFERENCES listings(listingID)
+      );
+    `);
+    console.log("Table 'listingsDetails' created or already exists.");
+     await connection.query(`
+      CREATE TABLE IF NOT EXISTS reviews (
+        reviewID INT AUTO_INCREMENT PRIMARY KEY,
+        reviewerID INT NOT NULL,
+        revieweeID INT NOT NULL, -- Assuming reviews can be about sellers
+        listingID INT NOT NULL,
+        rating INT NOT NULL,
+        comment TEXT,
+        FOREIGN KEY (reviewerID) REFERENCES users(userID),
+        FOREIGN KEY (revieweeID) REFERENCES users(userID),
+        FOREIGN KEY (listingID) REFERENCES listings(listingID)
+      );
+    `);
+    console.log("Table 'reviews' created or already exists.");
+    await connection.end();
+  } catch (error) {
+    console.error("An error occurred:", error.message);
+  }
 }
-
-function gen_random_id() {
-  const random_id = uuid.v4();
-  return random_id;
-}
-
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+app.post('/users/register', async (req, res) => {
+  const { username, full_name, password, email, phoneNum: phoneNumber } = req.body;
+  try {
+    const connection = await mysql.createConnection(dbConfig);
+    // Check if user already exists
+    const [users] = await connection.execute(
+      'SELECT * FROM users WHERE username = ? OR email = ? OR phoneNumber = ?',
+      [username, email, phoneNumber]
+    );
+    if (users.length > 0) {
+      // If user exists, send an error response
+      await connection.end();
+      return res.status(409).json({ error: 'User with provided username, email, or phone number already exists' });
+    }
+    // If user does not exist, insert new user
+    await connection.execute(
+      'INSERT INTO users (username, full_name, password, email, phoneNumber) VALUES (?, ?, ?, ?, ?)',
+      ["azaharia", full_name, password, email, phoneNumber]
+    );
+    await connection.end();
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (error) {
+    console.error('Error registering user:', error);
+    res.status(500).json({ error: 'Failed to register user' });
+  }
 });
+app.post('/users/login', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const connection = await mysql.createConnection(dbConfig);
+    // Find the user by username or email
+    const [users] = await connection.execute(
+      'SELECT * FROM users WHERE username = ? OR email = ?',
+      [username, username] // Use the same variable twice if you allow login with both username and email
+    );
+    if (users.length === 0) {
+      await connection.end();
+      return res.status(404).json({ error: 'User not found' });
+    }
+    const user = users[0];
+    // Verify the password. Assume you hash passwords and use a library like bcrypt for verification
+    const passwordIsValid = (user.password === password); // Replace this with your hash comparison logic
+    if (!passwordIsValid) {
+      await connection.end();
+      return res.status(401).json({ error: 'Invalid password' });
+    }
+    // Here, you'd typically generate a token or session for the user
+    // For simplicity, we'll just return a success message
+    await connection.end();
+    res.status(200).json({ message: 'Login successful', token: 'your_generated_token_here' });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+setupDatabase()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  })
+  .catch(error => {
+    console.error("Failed to setup database:", error);
+    process.exit(1); // Exit the application if database setup fails
+  });
+
+module.exports = app;

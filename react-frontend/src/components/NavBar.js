@@ -8,7 +8,7 @@ function NavBar() {
   return (
     <nav style={{ backgroundColor: 'white', padding: '10px', display: 'flex', alignItems: 'center' }}>
       <div style={{ flexGrow: 1 }}>
-        <img src={logo} alt="Logo" style={{ height: '50px', marginTop: '10px', marginRight: '20px' }} />
+        <img src={logo} alt="Logo" style={{ height: '60px', marginTop: '10px', marginRight: '20px' }} />
       </div>
 
       <ul style={{ listStyleType: 'none', margin: 0, padding: 0, display: 'flex', alignItems: 'center', fontFamily: 'inter, sans-serif'}}>
