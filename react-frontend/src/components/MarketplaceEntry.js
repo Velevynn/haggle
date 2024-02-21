@@ -1,3 +1,5 @@
+// MarketplaceEntry.js (Josh)
+
 import React from "react";
 import './marketplace-entry.css';
 import missing from '../resources/missing.jpg';

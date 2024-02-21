@@ -1,5 +1,4 @@
-// Form.js
-// Author: Karan
+// Form.js (Karan)
 
 import React, { useState } from "react";
 import axios from 'axios';
