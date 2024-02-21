@@ -15,8 +15,18 @@ function App() {
         <NavBar />
         <Routes>
           <Route
-            path="/SignUpPage"
+            path="/sign-up"
             element={<SignUpPage />}
+          />
+          <Route 
+            path = "/about"
+          />
+          <Route 
+            path = "/services"
+          />
+          <Route 
+            path = "/"
+            element = {<Marketplace />}
           />
           <Route 
             path = "/marketplace"

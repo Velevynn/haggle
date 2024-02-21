@@ -3,7 +3,15 @@ import './marketplace-entry.css';
 import missing from '../resources/missing.jpg';
 
 
-function Entry({title, description, price }) {
+function Entry({title, price }) {
+  const renderPrice = () => {
+    if (price === "0") {
+      return <p style={{ color: 'green', fontWeight: 'bold', margin: 0 }}>FREE</p>;
+    } else {
+      return <p style={{ color: 'green', fontWeight: 'bold', margin: 0 }}>${price}</p>;
+    }
+  };
+
   return (
     <div className="entry-container">
       <div className="image-container">
@@ -12,7 +20,7 @@ function Entry({title, description, price }) {
 
       <div className="text-container">
         <h2 style={{ fontSize: '25px', fontWeight: 600, margin: '10px 0' }}>{title}</h2>
-        <p style={{ color: 'green', fontWeight: 'bold', margin: 0 }}>${price}</p>
+        {renderPrice()}
       </div>
     </div>
   );

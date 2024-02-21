@@ -13,10 +13,10 @@ function NavBar() {
 
       <ul style={{ listStyleType: 'none', margin: 0, padding: 0, display: 'flex', alignItems: 'center', fontFamily: 'inter, sans-serif'}}>
         <li style={{ margin: '0 10px' }}>
-          <Link to="/">About</Link>
+          <Link to="/about">About</Link>
         </li>
         <li style={{ margin: '0 10px' }}>
-          <Link to="/">Services</Link>
+          <Link to="/services">Services</Link>
         </li>
         <li style={{ margin: '0 10px' }}>
           <Link to="/marketplace">Marketplace</Link>
