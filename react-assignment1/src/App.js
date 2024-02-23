@@ -1,5 +1,6 @@
 import React from 'react';
 import SignUpPage from './Authentication/SignUpPage';
+import LoginPage from './Authentication/LoginPage';
 
 function App() {
   return (

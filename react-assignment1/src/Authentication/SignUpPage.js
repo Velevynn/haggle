@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
-import { FaCheckCircle } from 'react-icons/fa';
+import { FaCheckCircle, FaTimesCircle} from 'react-icons/fa';
+import logoImage from '../assets/haggle-horizontal.png';
 
 // Styled components
 const Container = styled.div`
   max-width: 400px;
   margin: 0 auto;
-  padding: 20px;
+  margin-top: 100px;
+  padding: 40px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-`;
-
-const Title = styled.h2`
-  text-align: center;
-  color: #333;
 `;
 
 const Form = styled.form`
@@ -23,6 +20,7 @@ const Form = styled.form`
 
 const Label = styled.label`
   display: block;
+  margin-top: 8px;
   margin-bottom: 0px;
   color: #666;
   font-size: 12px;
@@ -32,6 +30,7 @@ const Label = styled.label`
 const InputGroup = styled.div`
   position: relative;
   margin-bottom: 0px;
+  padding: 0px;
 `;
 
 const Input = styled.input`
@@ -170,92 +169,92 @@ function SignUpPage() {
 
   return (
     <Container>
-        <Title>Signup Page</Title>
-        <Form onSubmit={handleSubmit}>
+        <img src={logoImage} alt="Haggle Logo" style={{ display: 'block', margin: '0 auto 20px', maxWidth: '200px', height: 'auto' }} />        <Form onSubmit={handleSubmit}>
             <InputGroup>
-            <Label htmlFor="phoneNum">Phone Number</Label>
-            <Input
-                type="tel"
-                name="phoneNum"
-                id="phoneNum"
-                value={user.phoneNum}
-                onChange={handleChange}
-                required />
-            <ValidationIcon isValid={isInputValid('phoneNum', user.phoneNum)}>
-                {user.phoneNum.length > 0 ? <FaCheckCircle /> : null}
-            </ValidationIcon>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                    type="email"
+                    name="email"
+                    id="email"
+                    value={user.email}
+                    onChange={handleChange}
+                    required />
+                <ValidationIcon isValid={isInputValid('email', user.email)}>
+                    {user.email.length > 0 ? (isInputValid('email', user.email) ? <FaCheckCircle /> : <FaTimesCircle />) : null}
+                </ValidationIcon>
+            </InputGroup> 
+
+            <InputGroup>
+                <Label htmlFor="phoneNum">Phone Number</Label>
+                <Input
+                    type="tel"
+                    name="phoneNum"
+                    id="phoneNum"
+                    value={user.phoneNum}
+                    onChange={handleChange}
+                    required />
+                <ValidationIcon isValid={isInputValid('phoneNum', user.phoneNum)}>
+                    {user.username.length > 0 ? (isInputValid('phoneNum', user.phoneNum) ? <FaCheckCircle /> : <FaTimesCircle />) : null}
+                </ValidationIcon>
             </InputGroup>
 
             <InputGroup>
-            <Label htmlFor="username">Username</Label>
-            <Input
-                type="text"
-                name="username"
-                id="username"
-                value={user.username}
-                onChange={handleChange}
-                required />
-            <ValidationIcon isValid={isInputValid('username', user.username)}>
-                {user.username.length > 0 ? <FaCheckCircle /> : null}
-            </ValidationIcon>
+                <Label htmlFor="username">Username</Label>
+                <Input
+                    type="text"
+                    name="username"
+                    id="username"
+                    value={user.username}
+                    onChange={handleChange}
+                    required />
+                <ValidationIcon isValid={isInputValid('username', user.username)}>
+                    {user.username.length > 0 ? (isInputValid('username', user.username) ? <FaCheckCircle /> : <FaTimesCircle />) : null}
+                </ValidationIcon>
             </InputGroup>
 
             <InputGroup>
-            <Label htmlFor="full_name">Full Name</Label>
-            <Input
-                type="text"
-                name="full_name"
-                id="full_name"
-                value={user.full_name}
-                onChange={handleChange}
-                required />
-            <ValidationIcon isValid={isInputValid('full_name', user.full_name)}>
-                {user.full_name.length > 0 ? <FaCheckCircle /> : null}
-            </ValidationIcon>
+                <Label htmlFor="full_name">Full Name</Label>
+                <Input
+                    type="text"
+                    name="full_name"
+                    id="full_name"
+                    value={user.full_name}
+                    onChange={handleChange}
+                    required />
+                <ValidationIcon isValid={isInputValid('full_name', user.full_name)}>
+                    {user.full_name.length > 0 ? (isInputValid('full_name', user.full_name) ? <FaCheckCircle /> : <FaTimesCircle />) : null}
+                </ValidationIcon>
             </InputGroup>
 
             <InputGroup>
-            <Label htmlFor="password">Password</Label>
-            <Input
-                type="password"
-                name="password"
-                id="password"
-                value={user.password}
-                onChange={handleChange}
-                required />
-            <ValidationIcon isValid={isInputValid('password', user.password)}>
-                {user.password.length > 0 ? <FaCheckCircle /> : null}
-            </ValidationIcon>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                    type="password"
+                    name="password"
+                    id="password"
+                    value={user.password}
+                    onChange={handleChange}
+                    required />
+                <ValidationIcon isValid={isInputValid('password', user.password)}>
+                    {user.password.length > 0 ? (isInputValid('password', user.password) ? <FaCheckCircle /> : <FaTimesCircle />) : null}
+                </ValidationIcon>
             </InputGroup>
 
             <InputGroup>
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <Input
-                type="password"
-                name="confirmPassword"
-                id="confirmPassword"
-                value={user.confirmPassword}
-                onChange={handleChange}
-                required />
-            <ValidationIcon isValid={isInputValid('confirmPassword', user.confirmPassword)}>
-                {user.confirmPassword.length > 0 && user.password === user.confirmPassword ? <FaCheckCircle /> : null}
-            </ValidationIcon>
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input
+                    type="password"
+                    name="confirmPassword"
+                    id="confirmPassword"
+                    value={user.confirmPassword}
+                    onChange={handleChange}
+                    required />
+                <ValidationIcon isValid={isInputValid('confirmPassword', user.confirmPassword)}>
+                    {user.confirmPassword.length > 0 ? (isInputValid('confirmPassword', user.confirmPassword) ? <FaCheckCircle /> : <FaTimesCircle />) : null}
+                </ValidationIcon>
             </InputGroup>
-            <InputGroup>
-            <Label htmlFor="email">Email</Label>
-            <Input
-                type="email"
-                name="email"
-                id="email"
-                value={user.email}
-                onChange={handleChange}
-                required />
-            <ValidationIcon isValid={isInputValid('email', user.email)}>
-                {user.email.length > 0 ? <FaCheckCircle /> : null}
-            </ValidationIcon>
-            </InputGroup>
-            {registrationSuccess && <SuccessMessage>User registered successfully!</SuccessMessage>}
-            <Button type="submit" disabled={!isFormValid}>Register</Button>
+            {registrationSuccess && <SuccessMessage>User signed up successfully!</SuccessMessage>}
+            <Button type="submit" disabled={!isFormValid}>Sign Up</Button>
         </Form>
         </Container>
   );
