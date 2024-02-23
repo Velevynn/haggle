@@ -12,3 +12,7 @@ body {
     margin: 2px; 
   }
 
+.team-container {
+    display: flex;
+    gap: 25px;
+}
