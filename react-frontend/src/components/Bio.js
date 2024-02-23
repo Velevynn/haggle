@@ -4,8 +4,6 @@ import defaultPfp from "../resources/default-pfp.jpg"
 
 function BioEntry(props) {
     const {name, photoPath, bio} = props;
-
-
     return (
         <div className = "bio-entry">
             <label className = "name">

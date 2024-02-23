@@ -5,6 +5,8 @@ import Marketplace from './pages/Marketplace';
 import AddListing from './pages/AddListing'
 import NavBar from './components/NavBar';
 import About from './pages/About';
+import Footer from './components/Footer';
+import TOS from './pages/TOS';
 
 function App() {
 
@@ -34,8 +36,13 @@ function App() {
             path = "/new-listing"
             element = {<AddListing />}
           />
+          <Route 
+            path = "/terms-of-service"
+            element = {<TOS />}
+          />
 
         </Routes>
+        {/*<Footer />*/}
       </BrowserRouter>
     </div>
   );
