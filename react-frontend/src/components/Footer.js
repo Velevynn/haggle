@@ -1,7 +1,7 @@
 // Footer.js (Josh)
 import React from 'react';
 import './footer.css';
-import teamLogo from '../resources/team-logo.png';
+import teamLogo from '../assets/team-logo.png';
 import { Link } from 'react-router-dom';
 
 function Footer() {

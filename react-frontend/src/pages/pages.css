@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'Newsreader';
-    src: url('../resources/newsreader/Newsreader_24pt-Regular.ttf') format('truetype');  /* Specify the path to the TrueType font file */
+    src: url('../assets/newsreader/Newsreader_24pt-Regular.ttf') format('truetype');  /* Specify the path to the TrueType font file */
 }
 
 body {

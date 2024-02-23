@@ -1,6 +1,6 @@
 import React from "react";
 import "./bio.css";
-import defaultPfp from "../resources/default-pfp.jpg"
+import defaultPfp from "../assets/default-pfp.jpg"
 
 function BioEntry(props) {
     const {name, photoPath, bio} = props;

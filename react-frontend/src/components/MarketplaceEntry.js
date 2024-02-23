@@ -2,7 +2,7 @@
 
 import React from "react";
 import './marketplace-entry.css';
-import missing from '../resources/missing.jpg';
+import missing from '../assets/missing.jpg';
 
 
 function Entry({title, price }) {
