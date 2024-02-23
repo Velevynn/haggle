@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
-import SignUpPage from './Authentication/SignUpPage';
+import SignUpPage from './pages/SignUpPage';
 import Marketplace from './pages/Marketplace';
 import AddListing from './pages/AddListing'
 import NavBar from './components/NavBar';
@@ -9,8 +9,6 @@ import Footer from './components/Footer';
 import TOS from './pages/TOS';
 
 function App() {
-
-
   return (
     <div className="container"> 
       <BrowserRouter basename="/">
@@ -40,9 +38,8 @@ function App() {
             path = "/terms-of-service"
             element = {<TOS />}
           />
-
         </Routes>
-        {/*<Footer />*/}
+        {/*<Footer >*/}
       </BrowserRouter>
     </div>
   );
