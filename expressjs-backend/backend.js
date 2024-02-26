@@ -107,6 +107,8 @@ app.post('/users/register', async (req, res) => {
   try {
     const connection = await mysql.createConnection(dbConfig);
 
+    await connection.query("USE haggle_db");
+
     const [users] = await connection.execute(
       'SELECT * FROM users WHERE username = ? OR email = ? OR phoneNumber = ?',
       [username, email, phoneNumber]
@@ -135,6 +137,8 @@ app.post('/users/login', async (req, res) => {
 
   try {
     const connection = await mysql.createConnection(dbConfig);
+
+    await connection.query("USE haggle_db");
     
     const [user] = await connection.execute(
       'SELECT * FROM users WHERE username = ? AND password = ?', // In a real application, you should hash and verify the password securely
@@ -159,6 +163,9 @@ app.get('/users/profile/:username', async (req, res) => {
 
   try {
     const connection = await mysql.createConnection(dbConfig);
+
+    await connection.query("USE haggle_db");
+
     const [user] = await connection.execute(
       'SELECT username, full_name, email, phoneNumber FROM users WHERE username = ?',
       [username]
@@ -183,6 +190,9 @@ app.put('/users/profile/:username', async (req, res) => {
 
   try {
     const connection = await mysql.createConnection(dbConfig);
+
+    await connection.query("USE haggle_db");
+
     await connection.execute(
       'UPDATE users SET full_name = ?, email = ?, phoneNumber = ? WHERE username = ?',
       [full_name, email, phoneNumber, username]
