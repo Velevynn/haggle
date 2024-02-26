@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
-import { FaCheckCircle} from 'react-icons/fa';
+import logoImage from '../assets/haggle-horizontal.png';
+import { Link } from 'react-router-dom';
 
 // Styled components
 const Container = styled.div`
   max-width: 400px;
   margin: 0 auto;
-  padding: 20px;
+  margin-top: 100px;
+  padding: 40px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-`;
-
-const Title = styled.h2`
-  text-align: center;
-  color: #333;
 `;
 
 const Form = styled.form`
@@ -23,6 +20,7 @@ const Form = styled.form`
 
 const Label = styled.label`
   display: block;
+  margin-top: 8px;
   margin-bottom: 0px;
   color: #666;
   font-size: 12px;
@@ -32,6 +30,7 @@ const Label = styled.label`
 const InputGroup = styled.div`
   position: relative;
   margin-bottom: 0px;
+  padding: 0px;
 `;
 
 const Input = styled.input`
@@ -42,14 +41,6 @@ const Input = styled.input`
   border-radius: 4px;
   box-sizing: border-box;
   font-size: 12px;
-`;
-
-const ValidationIcon = styled.span`
-  position: absolute;
-  top: 70%;
-  right: 10px;
-  transform: translateY(-50%);
-  color: ${props => props.isValid ? 'green' : 'red'};
 `;
 
 const Button = styled.button`
@@ -67,95 +58,94 @@ const Button = styled.button`
     }
 `;
 
-const SuccessMessage = styled.div`
-  color: green;
-  margin-top: 5px;
-  font-size: 12px;
-`;
-
 function LoginPage() {
-    const [user, setUser] = useState({
-      username: '',
-      full_name: '',
-      password: '',
-      confirmPassword: '',
-      email: '',
-      phoneNum: '',
+  const [credentials, setCredentials] = useState({
+    username: '',
+    password: '',
+  });
+
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  // Simplified validation for login
+  useEffect(() => {
+    const isValid = credentials.username.length > 0 && credentials.password.length > 0;
+    setIsFormValid(isValid);
+  }, [credentials]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setCredentials({
+      ...credentials,
+      [name]: value,
     });
-    const [registrationSuccess, setRegistrationSuccess] = useState(false);
-    const [isFormValid, setIsFormValid] = useState(false);
+  };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (isFormValid) {
+      try {
+        const response = await axios.post('http://localhost:6969/users/login', credentials, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-  
-    const handleChange = (event) => {
-      const { name, value } = event.target;
-      setUser({
-        ...user,
-        [name]: value,
-      });
-    };
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        if (isFormValid) {
-          try {
-            const response = await axios.post('http://localhost:6969/users/register', user, {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            });
-            if (response.status === 201) {
-              alert('User successfully registered!');
-              setUser({
-                username: '',
-                full_name: '',
-                password: '',
-                confirmPassword: '',
-                email: '',
-                phoneNum: '',
-              });
-              setRegistrationSuccess(true);
-            } else {
-              alert('Failed to register user.');
-            }
-          } catch (error) {
-            console.error('There was an error during the registration process:', error);
-            alert('There was an error during the registration process.');
-          }
+        if (response.status === 200) {
+          // Handle successful login here (e.g., redirect, update app state)
+          alert('User successfully logged in!');
         } else {
-          alert("Please ensure all fields are filled out correctly before submitting.");
+          alert('Failed to log in.');
         }
-    };
+      } catch (error) {
+        console.error('Login error:', error);
+        alert('There was an error during the login process.');
+      }
+    } else {
+      alert("Please fill in all fields correctly.");
+    }
+  };
 
   return (
     <Container>
-        <Title>Login Page</Title>
-        <Form onSubmit={handleSubmit}>
+      <img src={logoImage} alt="Logo" style={{ display: 'block', margin: '0 auto 20px', maxWidth: '200px', height: 'auto' }} />
+      <Form onSubmit={handleSubmit}>
+        <InputGroup>
+          <Label htmlFor="username">
+              Username
+          </Label> {/* or Email */}
+          <Input
+            type="text" // or email
+            name="username" // or email
+            id="username" // or email
+            value={credentials.username}
+            onChange={handleChange}
+            required
+          />
+        </InputGroup>
 
-            <InputGroup>
-            <Label htmlFor="username">Username</Label>
-            <Input
-                type="text"
-                name="username"
-                id="username"
-                value={user.username}
-                onChange={handleChange}
-                required />
-            </InputGroup>
-            <InputGroup>
-            <Label htmlFor="password">Password</Label>
-            <Input
-                type="password"
-                name="password"
-                id="password"
-                value={user.password}
-                onChange={handleChange}
-                required />
-            </InputGroup>
-            {registrationSuccess && <SuccessMessage>User logged in successfully!</SuccessMessage>}
-            {!isFormValid && <Button type="submit">Log in</Button>}
-        </Form>
-        </Container>
+        <InputGroup>
+          <Label htmlFor="password">
+              Password
+          </Label>
+          <Input
+            type="password"
+            name="password"
+            id="password"
+            value={credentials.password}
+            onChange={handleChange}
+            required
+          />
+        </InputGroup>
+        <Label>
+            <Link to="/signup" style={{ display: 'block', textAlign: 'center' }}>
+                Don't have an account? Sign up here
+            </Link>
+        </Label>
+        <Button type="submit" disabled={!isFormValid}>
+            Log In
+        </Button>
+      </Form>
+    </Container>
   );
 }
 

@@ -1,0 +1,159 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import styled from 'styled-components';
+import { FaEdit, FaSave } from 'react-icons/fa';
+import profileImagePlaceholder from '../assets/profile-placeholder.png';
+import { Link } from 'react-router-dom';
+
+// Reusing styled components from SignUpPage and adding or modifying as needed
+const Container = styled.div`
+  max-width: 600px;
+  margin: 0 auto;
+  margin-top: 50px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+`;
+
+// Other styled components (Form, InputGroup, Label, Input, Button, etc.) remain the same
+
+const ProfileImage = styled.img`
+  width: 120px;
+  height: 120px;
+  border-radius: 60px;
+  margin: 20px auto;
+  display: block;
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+`;
+
+const Label = styled.label`
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 0px;
+  color: #666;
+  font-size: 12px;
+
+`;
+
+const InputGroup = styled.div`
+  position: relative;
+  margin-bottom: 0px;
+  padding: 0px;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 8px;
+  padding-right: 30px; /* Make room for the checkmark */
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 12px;
+`;
+
+const Button = styled.button`
+    padding: 8px;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+
+    &:hover {
+        background-color: #003d82;
+    }
+`;
+
+function ProfilePage() {
+  const [userProfile, setUserProfile] = useState({
+    username: '',
+    full_name: '',
+    email: '',
+    bio: '',
+  });
+  const [editMode, setEditMode] = useState(false);
+
+  // Fetch user profile data from an API (placeholder URL)
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const response = await axios.get('http://localhost:6969/users/profile'); // Update with actual endpoint
+        setUserProfile(response.data);
+      } catch (error) {
+        console.error('Failed to fetch profile data:', error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setUserProfile({
+      ...userProfile,
+      [name]: value,
+    });
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (editMode) {
+      try {
+        // Update profile data via API (placeholder URL)
+        const response = await axios.put('http://localhost:6969/users/profile', userProfile, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.status === 200) {
+          alert('Profile successfully updated!');
+          setEditMode(false);
+        } else {
+          alert('Failed to update profile.');
+        }
+      } catch (error) {
+        console.error('There was an error updating the profile:', error);
+      }
+    }
+  };
+
+
+  return (
+    <Container>
+      <ProfileImage src={profileImagePlaceholder} alt="Profile" />
+      <Form onSubmit={handleSubmit}>
+        {/* Profile fields like username, full name, email, and bio */}
+        {/* Each InputGroup can be similar to those in SignUpPage, adjust based on the field */}
+        {/* For simplicity, reusing the Input and Label components without validation icons */}
+
+        {/* Example for username, replicate for others */}
+        <InputGroup>
+          <Label htmlFor="username">Username</Label>
+          <Input
+            type="text"
+            name="username"
+            id="username"
+            value={userProfile.username}
+            onChange={handleChange}
+            disabled={!editMode}
+            required
+          />
+        </InputGroup>
+        
+        {/* Add other fields (full_name, email, bio) here following the same structure */}
+
+        <Button type="submit" onClick={() => setEditMode(!editMode)}>
+          {editMode ? <FaSave /> : <FaEdit />} {editMode ? 'Save Changes' : 'Edit Profile'}
+        </Button>
+      </Form>
+    </Container>
+  );
+}
+
+export default ProfilePage;

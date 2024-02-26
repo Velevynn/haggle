@@ -3,6 +3,7 @@ import axios from 'axios';
 import styled from 'styled-components';
 import { FaCheckCircle, FaTimesCircle} from 'react-icons/fa';
 import logoImage from '../assets/haggle-horizontal.png';
+import { Link } from 'react-router-dom';
 
 // Styled components
 const Container = styled.div`
@@ -128,20 +129,16 @@ function SignUpPage() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        // Check if the form is valid based on the isFormValid state
         if (isFormValid) {
           try {
-            // Make the API call to register the user
             const response = await axios.post('http://localhost:6969/users/register', user, {
               headers: {
                 'Content-Type': 'application/json',
               },
             });
       
-            // Check if the user was successfully registered
             if (response.status === 201) {
               alert('User successfully registered!');
-              // Reset the form state (user) here if needed
               setUser({
                 username: '',
                 full_name: '',
@@ -150,19 +147,15 @@ function SignUpPage() {
                 email: '',
                 phoneNum: '',
               });
-              // Optionally, update the state to show a success message
               setRegistrationSuccess(true);
             } else {
-              // Handle responses that are not successful registrations
               alert('Failed to register user.');
             }
           } catch (error) {
-            // Handle any errors that occur during the API call
             console.error('There was an error during the registration process:', error);
             alert('There was an error during the registration process.');
           }
         } else {
-          // Optionally, inform the user that the form data is invalid
           alert("Please ensure all fields are filled out correctly before submitting.");
         }
     };
@@ -171,7 +164,9 @@ function SignUpPage() {
     <Container>
         <img src={logoImage} alt="Haggle Logo" style={{ display: 'block', margin: '0 auto 20px', maxWidth: '200px', height: 'auto' }} />        <Form onSubmit={handleSubmit}>
             <InputGroup>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">
+                    Email
+                </Label>
                 <Input
                     type="email"
                     name="email"
@@ -185,7 +180,9 @@ function SignUpPage() {
             </InputGroup> 
 
             <InputGroup>
-                <Label htmlFor="phoneNum">Phone Number</Label>
+                <Label htmlFor="phoneNum">
+                    Phone Number
+                </Label>
                 <Input
                     type="tel"
                     name="phoneNum"
@@ -199,7 +196,9 @@ function SignUpPage() {
             </InputGroup>
 
             <InputGroup>
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="username">
+                    Username
+                </Label>
                 <Input
                     type="text"
                     name="username"
@@ -213,7 +212,9 @@ function SignUpPage() {
             </InputGroup>
 
             <InputGroup>
-                <Label htmlFor="full_name">Full Name</Label>
+                <Label htmlFor="full_name">
+                    Full Name
+                </Label>
                 <Input
                     type="text"
                     name="full_name"
@@ -227,7 +228,9 @@ function SignUpPage() {
             </InputGroup>
 
             <InputGroup>
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">
+                    Password
+                </Label>
                 <Input
                     type="password"
                     name="password"
@@ -241,7 +244,9 @@ function SignUpPage() {
             </InputGroup>
 
             <InputGroup>
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">
+                    Confirm Password
+                </Label>
                 <Input
                     type="password"
                     name="confirmPassword"
@@ -253,8 +258,18 @@ function SignUpPage() {
                     {user.confirmPassword.length > 0 ? (isInputValid('confirmPassword', user.confirmPassword) ? <FaCheckCircle /> : <FaTimesCircle />) : null}
                 </ValidationIcon>
             </InputGroup>
-            {registrationSuccess && <SuccessMessage>User signed up successfully!</SuccessMessage>}
-            <Button type="submit" disabled={!isFormValid}>Sign Up</Button>
+            
+            <Label>
+                <Link to="/login" style={{ display: 'block', textAlign: 'center' }}>
+                    Already have an account? Click here
+                </Link>
+            </Label>
+            {registrationSuccess && <SuccessMessage>
+                User signed up successfully!
+            </SuccessMessage>}
+            <Button type="submit" disabled={!isFormValid}>
+                Sign Up
+            </Button>
         </Form>
         </Container>
   );

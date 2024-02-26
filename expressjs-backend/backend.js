@@ -5,29 +5,24 @@ const cors = require('cors');
 const PORT = 6969;
 
 app.use(cors());
-app.use(express.json()); // This is crucial for parsing JSON bodies
+app.use(express.json());
 
-// Database configuration
 const dbConfig = {
-  host: 'localhost',
-  user: 'root', // Use your MySQL username
-  password: '', // Use your MySQL password
-  database: 'haggle_db' // Specify the database name
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: ''
 };
 
-// Async function to establish database connection, create a database, and add tables
 async function setupDatabase() {
   try {
     const connection = await mysql.createConnection(dbConfig);
 
-    // Create a new database
     await connection.query("CREATE DATABASE IF NOT EXISTS haggle_db");
     console.log("Database created or already exists.");
 
-    // Use the newly created database
     await connection.query("USE haggle_db");
 
-    // Create users table
     await connection.query(`
       CREATE TABLE IF NOT EXISTS users (
         userID INT AUTO_INCREMENT PRIMARY KEY,
@@ -41,12 +36,11 @@ async function setupDatabase() {
     `);
     console.log("Table 'users' created or already exists.");
 
-    // Create the "Listing" table
     await connection.query(`
       CREATE TABLE IF NOT EXISTS listings (
         listingID INT AUTO_INCREMENT PRIMARY KEY,
         userID INT NOT NULL, -- Link to users table
-        name VARCHAR(255) NOT NULL,
+        title VARCHAR(255) NOT NULL,
         price DECIMAL(10, 2) NOT NULL,
         description TEXT,
         postDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -113,19 +107,16 @@ app.post('/users/register', async (req, res) => {
   try {
     const connection = await mysql.createConnection(dbConfig);
 
-    // Check if user already exists
     const [users] = await connection.execute(
       'SELECT * FROM users WHERE username = ? OR email = ? OR phoneNumber = ?',
       [username, email, phoneNumber]
     );
 
     if (users.length > 0) {
-      // If user exists, send an error response
       await connection.end();
       return res.status(409).json({ error: 'User with provided username, email, or phone number already exists' });
     }
 
-    // If user does not exist, insert new user
     await connection.execute(
       'INSERT INTO users (username, full_name, password, email, phoneNumber) VALUES (?, ?, ?, ?, ?)',
       [username, full_name, password, email, phoneNumber]
@@ -139,9 +130,74 @@ app.post('/users/register', async (req, res) => {
   }
 });
 
+app.post('/users/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const connection = await mysql.createConnection(dbConfig);
+    
+    const [user] = await connection.execute(
+      'SELECT * FROM users WHERE username = ? AND password = ?', // In a real application, you should hash and verify the password securely
+      [username, password]
+    );
+
+    if (user.length > 0) {
+      await connection.end();
+      res.status(200).json({ message: 'User logged in successfully' });
+    } else {
+      await connection.end();
+      res.status(401).json({ error: 'Invalid username or password' });
+    }
+  } catch (error) {
+    console.error('Error logging in:', error);
+    res.status(500).json({ error: 'Failed to log in' });
+  }
+});
+
+app.get('/users/profile/:username', async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const connection = await mysql.createConnection(dbConfig);
+    const [user] = await connection.execute(
+      'SELECT username, full_name, email, phoneNumber FROM users WHERE username = ?',
+      [username]
+    );
+
+    if (user.length > 0) {
+      await connection.end();
+      res.status(200).json(user[0]);
+    } else {
+      await connection.end();
+      res.status(404).json({ error: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ error: 'Failed to fetch user profile' });
+  }
+});
+
+app.put('/users/profile/:username', async (req, res) => {
+  const { username } = req.params;
+  const { full_name, email, phoneNumber } = req.body;
+
+  try {
+    const connection = await mysql.createConnection(dbConfig);
+    await connection.execute(
+      'UPDATE users SET full_name = ?, email = ?, phoneNumber = ? WHERE username = ?',
+      [full_name, email, phoneNumber, username]
+    );
+
+    await connection.end();
+    res.status(200).json({ message: 'Profile updated successfully' });
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    res.status(500).json({ error: 'Failed to update user profile' });
+  }
+});
+
 setupDatabase();
 
-// Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
