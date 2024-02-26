@@ -141,7 +141,7 @@ app.post('/users/login', async (req, res) => {
     await connection.query("USE haggle_db");
     
     const [user] = await connection.execute(
-      'SELECT * FROM users WHERE username = ? AND password = ?', // In a real application, you should hash and verify the password securely
+      'SELECT * FROM users WHERE username = ? AND password = ?',
       [username, password]
     );
 
