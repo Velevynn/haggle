@@ -1,8 +1,12 @@
 const express = require('express');
-const app = express();
 const mysql = require('mysql2/promise');
+const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
+
+const app = express();
 const PORT = 6969;
+const secretKey = 'YourSecretKey';
 
 app.use(cors());
 app.use(express.json());
@@ -101,34 +105,45 @@ async function setupDatabase() {
   }
 }
 
+const verifyToken = (req, res, next) => {
+  const bearerHeader = req.headers['authorization'];
+  if (!bearerHeader) return res.status(403).send({ message: "Token is required" });
+
+  const token = bearerHeader.split(' ')[1];
+  jwt.verify(token, secretKey, (err, decoded) => {
+    if (err) return res.status(401).send({ message: "Invalid Token" });
+    req.user = decoded;
+    next();
+  });
+};
+
 app.post('/users/register', async (req, res) => {
   const { username, full_name, password, email, phoneNum: phoneNumber } = req.body;
+  
+  // It appears bcrypt was intended to be used but not imported. Ensure bcrypt is imported.
+  const bcrypt = require('bcrypt');
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
     const connection = await mysql.createConnection(dbConfig);
-
     await connection.query("USE haggle_db");
 
-    const [users] = await connection.execute(
-      'SELECT * FROM users WHERE username = ? OR email = ? OR phoneNumber = ?',
-      [username, email, phoneNumber]
-    );
-
-    if (users.length > 0) {
-      await connection.end();
-      return res.status(409).json({ error: 'User with provided username, email, or phone number already exists' });
-    }
-
-    await connection.execute(
+    const [result] = await connection.execute(
       'INSERT INTO users (username, full_name, password, email, phoneNumber) VALUES (?, ?, ?, ?, ?)',
-      [username, full_name, password, email, phoneNumber]
+      [username, full_name, hashedPassword, email, phoneNumber]
     );
 
+    const token = jwt.sign({ username: username }, secretKey, { expiresIn: '24h' });
     await connection.end();
-    res.status(201).json({ message: 'User registered successfully' });
+    res.status(201).json({ message: 'User registered successfully', token });
   } catch (error) {
     console.error('Error registering user:', error);
-    res.status(500).json({ error: 'Failed to register user' });
+    if (error.code === 'ER_DUP_ENTRY') {
+      // Handle duplicate entry error
+      res.status(409).json({ error: 'Username or email already exists' });
+    } else {
+      res.status(500).json({ error: 'Failed to register user' });
+    }
   }
 });
 
@@ -137,20 +152,25 @@ app.post('/users/login', async (req, res) => {
 
   try {
     const connection = await mysql.createConnection(dbConfig);
-
     await connection.query("USE haggle_db");
     
-    const [user] = await connection.execute(
-      'SELECT * FROM users WHERE username = ? AND password = ?',
-      [username, password]
+    const [users] = await connection.execute(
+      'SELECT * FROM users WHERE username = ?',
+      [username]
     );
 
-    if (user.length > 0) {
-      await connection.end();
-      res.status(200).json({ message: 'User logged in successfully' });
+    if (users.length > 0) {
+      const user = users[0];
+      const validPassword = await bcrypt.compare(password, user.password);
+      if (validPassword) {
+        const token = jwt.sign({ username: username }, secretKey, { expiresIn: '24h' });
+        await connection.end();
+        res.status(200).json({ message: 'User logged in successfully', token });
+      } else {
+        res.status(401).json({ error: 'Invalid password' });
+      }
     } else {
-      await connection.end();
-      res.status(401).json({ error: 'Invalid username or password' });
+      res.status(404).json({ error: 'User not found' });
     }
   } catch (error) {
     console.error('Error logging in:', error);
@@ -158,12 +178,11 @@ app.post('/users/login', async (req, res) => {
   }
 });
 
-app.get('/users/profile/:username', async (req, res) => {
-  const { username } = req.params;
+app.get('/users/profile', verifyToken, async (req, res) => {
+  const username = req.user.username; // Extracted from token
 
   try {
     const connection = await mysql.createConnection(dbConfig);
-
     await connection.query("USE haggle_db");
 
     const [user] = await connection.execute(
@@ -172,37 +191,13 @@ app.get('/users/profile/:username', async (req, res) => {
     );
 
     if (user.length > 0) {
-      await connection.end();
       res.status(200).json(user[0]);
     } else {
-      await connection.end();
       res.status(404).json({ error: 'User not found' });
     }
   } catch (error) {
     console.error('Error fetching user profile:', error);
     res.status(500).json({ error: 'Failed to fetch user profile' });
-  }
-});
-
-app.put('/users/profile/:username', async (req, res) => {
-  const { username } = req.params;
-  const { full_name, email, phoneNumber } = req.body;
-
-  try {
-    const connection = await mysql.createConnection(dbConfig);
-
-    await connection.query("USE haggle_db");
-
-    await connection.execute(
-      'UPDATE users SET full_name = ?, email = ?, phoneNumber = ? WHERE username = ?',
-      [full_name, email, phoneNumber, username]
-    );
-
-    await connection.end();
-    res.status(200).json({ message: 'Profile updated successfully' });
-  } catch (error) {
-    console.error('Error updating user profile:', error);
-    res.status(500).json({ error: 'Failed to update user profile' });
   }
 });
 

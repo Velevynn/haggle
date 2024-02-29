@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 import logoImage from '../assets/haggle-horizontal.png';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 // Styled components
 const Container = styled.div`
@@ -59,51 +59,35 @@ const Button = styled.button`
 `;
 
 function LoginPage() {
-  const [credentials, setCredentials] = useState({
-    username: '',
-    password: '',
-  });
-
-  const [isFormValid, setIsFormValid] = useState(false);
-
-  // Simplified validation for login
-  useEffect(() => {
-    const isValid = credentials.username.length > 0 && credentials.password.length > 0;
-    setIsFormValid(isValid);
-  }, [credentials]);
+  const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const [isFormValid, setIsFormValid] = useState(false); // Define isFormValid state
+  const [errorMessage, setErrorMessage] = useState(''); // Use this if you want to display error messages
+  const navigate = useNavigate(); // make sure to import useNavigate from 'react-router-dom'
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setCredentials({
-      ...credentials,
-      [name]: value,
-    });
+    setCredentials({ ...credentials, [name]: value });
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (isFormValid) {
-      try {
-        const response = await axios.post('http://localhost:6969/users/login', credentials, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.status === 200) {
-          // Handle successful login here (e.g., redirect, update app state)
-          alert('User successfully logged in!');
-        } else {
-          alert('Failed to log in.');
-        }
-      } catch (error) {
-        console.error('Login error:', error);
-        alert('There was an error during the login process.');
+    try {
+      const response = await axios.post('http://localhost:6969/users/login', credentials);
+      localStorage.setItem('token', response.data.token); // Store the token
+      navigate('/profile'); // Navigate to profile page
+    } catch (error) {
+      if (error.response) {
+        setErrorMessage(error.response.data.error);
+      } else {
+        setErrorMessage('Login failed. Please try again.');
       }
-    } else {
-      alert("Please fill in all fields correctly.");
     }
   };
+
+  useEffect(() => {
+    const isValid = credentials.username.length > 0 && credentials.password.length > 0;
+    setIsFormValid(isValid);
+  }, [credentials]);
 
   return (
     <Container>
@@ -114,9 +98,9 @@ function LoginPage() {
               Username
           </Label> {/* or Email */}
           <Input
-            type="text" // or email
-            name="username" // or email
-            id="username" // or email
+            type="text"
+            name="username"
+            id="username"
             value={credentials.username}
             onChange={handleChange}
             required
@@ -137,10 +121,11 @@ function LoginPage() {
           />
         </InputGroup>
         <Label>
-            <Link to="/signup" style={{ display: 'block', textAlign: 'center' }}>
-                Don't have an account? Sign up here
-            </Link>
-        </Label>
+              Don't have an account? {}
+              <Link to="/signup" style={{ display: 'inline', color: '#0056b3'}}>
+                Sign up
+              </Link>
+            </Label>
         <Button type="submit" disabled={!isFormValid}>
             Log In
         </Button>

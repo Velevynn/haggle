@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
-import { FaEdit, FaSave } from 'react-icons/fa';
 import profileImagePlaceholder from '../assets/profile-placeholder.png';
+import { useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
   max-width: 600px;
@@ -32,18 +32,15 @@ const ProfileValue = styled.span`
   margin-left: 10px;
 `;
 
-const EditButton = styled.button`
-  padding: 8px;
-  background-color: #0056b3;
+const SignOutButton = styled.button`
+  padding: 10px 20px;
+  background-color: #f44336; /* Red */
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s;
-
-  &:hover {
-    background-color: #003d82;
-  }
+  display: block;
+  margin: 20px auto;
 `;
 
 function ProfilePage() {
@@ -51,82 +48,52 @@ function ProfilePage() {
     username: '',
     full_name: '',
     email: '',
-    bio: '',
+    phoneNumber: '',
   });
-  const [editMode, setEditMode] = useState(false);
+
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    localStorage.removeItem('token'); // Remove the token from localStorage
+    navigate('/login'); // Navigate to the login page
+  };
 
   useEffect(() => {
     const fetchUserProfile = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login'); // Redirect to login if there's no token
+        return;
+      }
+
       try {
-        const response = await axios.get('http://localhost:6969/users/profile');
+        const response = await axios.get(`http://localhost:6969/users/profile`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         setUserProfile(response.data);
       } catch (error) {
         console.error('Failed to fetch profile data:', error);
+        navigate('/login');
       }
     };
 
     fetchUserProfile();
-  }, []);
-
-  const toggleEditMode = () => {
-    setEditMode(!editMode);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setUserProfile(prevState => ({
-      ...prevState,
-      [name]: value,
-    }));
-  };
-
-  const saveChanges = async () => {
-    try {
-      const response = await axios.put('http://localhost:6969/users/profile', userProfile, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (response.status === 200) {
-        alert('Profile successfully updated!');
-        setEditMode(false);
-      } else {
-        alert('Failed to update profile.');
-      }
-    } catch (error) {
-      console.error('There was an error updating the profile:', error);
-    }
-  };
+  }, [navigate]);
 
   return (
     <Container>
       <ProfileImage src={profileImagePlaceholder} alt="Profile" />
-      {editMode ? (
-        <form onSubmit={(e) => { e.preventDefault(); saveChanges(); }}>
-          {Object.keys(userProfile).map((key) => (
-            <ProfileField key={key}>
-              <ProfileLabel>{key.replace('_', ' ')}:</ProfileLabel>
-              <input
-                type="text"
-                name={key}
-                value={userProfile[key]}
-                onChange={handleInputChange}
-              />
-            </ProfileField>
-          ))}
-          <EditButton type="submit"><FaSave /> Save Changes</EditButton>
-        </form>
-      ) : (
-        <>
-          {Object.entries(userProfile).map(([key, value]) => (
-            <ProfileField key={key}>
-              <ProfileLabel>{key.replace('_', ' ')}:</ProfileLabel>
-              <ProfileValue>{value}</ProfileValue>
-            </ProfileField>
-          ))}
-          <EditButton onClick={toggleEditMode}><FaEdit /> Edit Profile</EditButton>
-        </>
-      )}
+      <form>
+        {Object.entries(userProfile).map(([key, value]) => (
+          <ProfileField key={key}>
+            <ProfileLabel>{key.replace('_', ' ')}:</ProfileLabel>
+            <ProfileValue>{value}</ProfileValue>
+          </ProfileField>
+        ))}
+      </form>
+      <SignOutButton onClick={handleSignOut}>Sign Out</SignOutButton>
     </Container>
   );
 }
