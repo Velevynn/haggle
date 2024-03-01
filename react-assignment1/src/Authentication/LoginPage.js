@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import logoImage from '../assets/haggle-horizontal.png';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -18,44 +18,102 @@ const Form = styled.form`
   flex-direction: column;
 `;
 
-const Label = styled.label`
-  display: block;
-  margin-top: 8px;
-  margin-bottom: 0px;
-  color: #666;
-  font-size: 12px;
-
-`;
-
 const InputGroup = styled.div`
   position: relative;
-  margin-bottom: 0px;
-  padding: 0px;
+  margin-bottom: 2px;
+`;
+
+const InputLabel = styled.label`
+  position: absolute;
+  top: -15%;
+  left: 4%;
+  font-size: 14px;
+  color: #999;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  font-weight: normal;
+
+  ${props => props.hasContent && css`
+    transform: translate(0%, -45%);
+    font-size: 10px;
+    font-weight: normal;
+    color: #999;
+  `}
 `;
 
 const Input = styled.input`
+  position: absolute
   width: 100%;
-  padding: 8px;
-  padding-right: 30px; /* Make room for the checkmark */
+  padding-top: 14px;
+  padding-bottom: 6px;
+  height: 40px;
   border: 1px solid #ddd;
   border-radius: 4px;
   box-sizing: border-box;
   font-size: 12px;
+  transition: border 0.3s, box-shadow 0.3s;
+
+  &:focus {
+    outline: none;
+    border-color: #007b00;
+    box-shadow: 0 0 8px rgba(0, 183, 0, 0.8);
+  }
+`;
+
+const ForgotPasswordLabel= styled.label`
+color: #666;
+font-size: 11px;
+text-align: left;
+margin-top: 0px;
+margin-bottom: 10px;
+`;
+
+const LinkedLabel = styled.label`
+  color: #666;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 12px;
+  font-weight: normal
 `;
 
 const Button = styled.button`
-    padding: 8px;
-    background-color: #0056b3;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-top: 20px;
-    transition: background-color 0.3s;
+  padding: 8px;
+  background-color: #16A44A;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s;
 
-    &:hover {
-        background-color: #003d82;
-    }
+  &:hover {
+      background-color: #138A3E;
+      border-color: #16A44A;
+  }
+
+  &:disabled {
+    background-color: #8CCBA1;
+    cursor: not-allowed;
+    border-color: transparent;
+  }
+`;
+
+const SignUpContainer = styled.div`
+  max-width: 400px;
+  min-height: 60px;
+  margin: 10px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+`;
+
+const SignUpLabel = styled.label`
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  margin: 25px;
+  font-weight: normal;
 `;
 
 function LoginPage() {
@@ -90,47 +148,64 @@ function LoginPage() {
   }, [credentials]);
 
   return (
-    <Container>
-      <img src={logoImage} alt="Logo" style={{ display: 'block', margin: '0 auto 20px', maxWidth: '200px', height: 'auto' }} />
-      <Form onSubmit={handleSubmit}>
-        <InputGroup>
-          <Label htmlFor="username">
-              Username
-          </Label> {/* or Email */}
-          <Input
-            type="text"
-            name="username"
-            id="username"
-            value={credentials.username}
-            onChange={handleChange}
-            required
-          />
-        </InputGroup>
+    <>
+      <Container>
+        <img src={logoImage} alt="Logo" style={{ display: 'block', margin: '0 auto 20px', maxWidth: '200px', height: 'auto' }} />
+        <Form onSubmit={handleSubmit}>
+          <InputGroup>
+            <Input
+              type="text"
+              name="username"
+              id="username"
+              value={credentials.username}
+              onChange={handleChange}
+              required/>
+            <InputLabel htmlFor="username" hasContent={credentials.username.length > 0}>Username</InputLabel>
+          </InputGroup>
 
-        <InputGroup>
-          <Label htmlFor="password">
-              Password
-          </Label>
-          <Input
-            type="password"
-            name="password"
-            id="password"
-            value={credentials.password}
-            onChange={handleChange}
-            required
-          />
-        </InputGroup>
-        <Label>
-              Don't have an account? {}
-              <Link to="/signup" style={{ display: 'inline', color: '#0056b3'}}>
-                Sign up
-              </Link>
-            </Label>
-        <Button type="submit" disabled={!isFormValid}>
-            Log In
-        </Button>
-      </Form>
-    </Container>
+          <InputGroup>
+            <Input
+              type="password"
+              name="password"
+              id="password"
+              value={credentials.password}
+              onChange={handleChange}
+              required/>
+            <InputLabel htmlFor="password" hasContent={credentials.password.length > 0}>Password</InputLabel>
+          </InputGroup>
+
+          <ForgotPasswordLabel>
+            <Link to="/forgot-password" style={{ display: 'inline', color: '#0056b3'}}>
+              Forgot your password?
+            </Link>
+          </ForgotPasswordLabel>
+
+          <Button type="submit" disabled={!isFormValid}>
+              Log in
+          </Button>
+
+          <LinkedLabel>
+              By logging in you agree to our {}
+                <Link to="/terms-of-service" style={{ display: 'inline', color: '#0056b3', fontWeight: 'bold'}}>
+                  Terms of Service
+                </Link>
+              {} and acknowledge our {}
+                <Link to="/privacy-policy" style={{ display: 'inline', color: '#0056b3', fontWeight: 'bold'}}>
+                  Privacy Policy
+                </Link>
+            </LinkedLabel>
+        </Form>
+      </Container>
+
+      <SignUpContainer>
+        <SignUpLabel>
+          Don't have an account? {}
+          <Link to="/signup" style={{ display: 'inline', color: '#0056b3'}}>
+            Sign up
+          </Link>
+        </SignUpLabel>
+      </SignUpContainer>
+    </>
   );
 }
 

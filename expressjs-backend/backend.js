@@ -117,6 +117,55 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+app.post('/users/check', async (req, res) => {
+  const { username, email, phoneNum } = req.body;
+  
+  try {
+    const connection = await mysql.createConnection(dbConfig);
+    await connection.query("USE haggle_db");
+    
+    let conflict = null;
+
+    // Check if username exists
+    const [usernameResult] = await connection.execute(
+      'SELECT 1 FROM users WHERE username = ? LIMIT 1',
+      [username]
+    );
+    if (usernameResult.length > 0) conflict = 'Username';
+
+    // Check if email exists
+    const [emailResult] = await connection.execute(
+      'SELECT 1 FROM users WHERE email = ? LIMIT 1',
+      [email]
+    );
+    if (emailResult.length > 0) conflict = 'Email';
+
+    // Check if phone number exists
+    const [phoneResult] = await connection.execute(
+      'SELECT 1 FROM users WHERE phoneNumber = ? LIMIT 1',
+      [phoneNum]
+    );
+    if (phoneResult.length > 0) conflict = 'Phone Number';
+
+    if (conflict) {
+      res.status(409).json({
+        exists: true,
+        message: `${conflict} already exists.`,
+        conflict
+      });
+    } else {
+      res.status(200).json({
+        exists: false,
+        message: 'No conflicts with username, email, or phone number.'
+      });
+    }
+  } catch (error) {
+    console.error('Error checking user details:', error);
+    res.status(500).json({ error: 'Failed to check user details' });
+  }
+});
+
+
 app.post('/users/register', async (req, res) => {
   const { username, full_name, password, email, phoneNum: phoneNumber } = req.body;
   

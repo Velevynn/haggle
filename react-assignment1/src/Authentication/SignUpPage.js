@@ -9,7 +9,7 @@ import { Link, useNavigate } from 'react-router-dom';
 const Container = styled.div`
   max-width: 400px;
   margin: 0 auto;
-  margin-top: 70px;
+  margin-top: 35px;
   padding: 40px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 `;
@@ -34,7 +34,8 @@ const LinkedLabel = styled.label`
   color: #666;
   font-size: 12px;
   text-align: center;
-  margin-top: 12px;
+  margin-top: 10px;
+  font-weight: normal;
 `;
 
 const LoginLabel = styled.label`
@@ -52,7 +53,7 @@ const Form = styled.form`
 
 const InputGroup = styled.div`
   position: relative;
-  margin-bottom: 2px;
+  margin-bottom: 0px;
 `;
 
 const InputLabel = styled.label`
@@ -159,8 +160,10 @@ function SignUpPage() {
   });
 
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   // Validate each input field
@@ -172,8 +175,8 @@ function SignUpPage() {
     };
 
     const phoneNumRules = {
-      minLength: value.length == 10,
-      maxLength: value.length == 10,
+      minLength: value.length === 10,
+      maxLength: value.length === 10,
       containsNumber: /[0-9]/.test(value),
     };
 
@@ -201,6 +204,9 @@ function SignUpPage() {
     setIsFormValid(isValid);
   }, [user]);
 
+  const handlePasswordFocus = () => setPasswordFocused(true);
+  const handlePasswordBlur = () => setPasswordFocused(false);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -217,37 +223,58 @@ function SignUpPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+  
+    // Reset error message at the beginning of submission attempt
+    setErrorMessage('');
+
     if (isFormValid) {
       try {
-        const response = await axios.post('http://localhost:6969/users/register', user, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
+        // Pre-registration check for existing username, email, or phone number
+        const checkResponse = await axios.post('http://localhost:6969/users/check', {
+          email: user.email,
+          phoneNum: user.phoneNum,
+          username: user.username,
         });
-
-        const { token } = response.data;
-        localStorage.setItem('token', token);
-
-        navigate('/profile');
+  
+        if (checkResponse.data.exists) {
+          // Display specific error message based on the conflict
+          setErrorMessage(`${checkResponse.data.message} already exists.`);
+        } else {
+          // Proceed with registration if no conflicts
+          const registerResponse = await axios.post('http://localhost:6969/users/register', user);
+          if (registerResponse.status === 201) {
+            setRegistrationSuccess(true);
+            navigate('/profile');
+          }
+        }
       } catch (error) {
-        console.error('There was an error during the registration process:', error);
-        alert(error.response.data.error || 'There was an error during the registration process.');
+        if (error.response) {
+          // Backend should provide specific error message in response
+          const message = error.response.data.error || error.response.data.message;
+          setErrorMessage(`Error:  ${message}`);
+        } else {
+          // Fallback error message for network issues or unexpected errors
+          setErrorMessage('An error occurred during registration. Please try again.');
+        }
       }
     } else {
-      alert("Please ensure all fields are filled out correctly before submitting.");
+      setErrorMessage("Please ensure all fields are filled out correctly before submitting.");
     }
   };
+  
 
   return (
     <>
     <Container>
         <img src={logoImage} alt="Haggle Logo" style={{ display: 'block', margin: '0 auto 0px', maxWidth: '200px', height: 'auto' }} />        <Form onSubmit={handleSubmit}>
 
-          <HeaderLabel>
+          <HeaderLabel style={{ marginTop: '20px'}}>
             Join our community of Cal Poly students to buy, sell, and trade.
           </HeaderLabel>
 
-          <InputGroup style={{ marginTop: '20px' }}>
+          {errorMessage && <div style={{ color: 'red', marginTop: '0px', marginBottom: '0px', fontSize: '12px', textAlign: 'left' }}>{errorMessage}</div>}
+
+          <InputGroup style={{ marginTop: '5px' }}>
               <Input
                 type="email"
                 name="email"
@@ -317,41 +344,45 @@ function SignUpPage() {
                 minLength = "8"
                 value={user.password}
                 onChange={handleChange}
+                onFocus={handlePasswordFocus}
+                onBlur={handlePasswordBlur}
                 required />
               <InputLabel htmlFor="password" hasContent={user.password.length > 0}>Password</InputLabel>
-              <PasswordRules>
-                <div style={{ color: user.password.length >= 8 &&  user.password.length <= 20? 'green' : 'red' }}>At least 8 characters.</div>
-                <div style={{ color: /[0-9]/.test(user.password) ? 'green' : 'red' }}>At least one number.</div>
-                <div style={{ color: /[\W_]/.test(user.password) ? 'green' : 'red' }}>At least one special character.</div>
-              </PasswordRules>
+              {passwordFocused && ( // Conditional rendering based on focus
+                  <PasswordRules>
+                  <div style={{ color: user.password.length >= 8 ? 'green' : 'red' }}>
+                    {user.password.length >= 8 ? <FaCheckCircle style={{ marginRight: '8px', position: 'relative', top: '2px' }} /> : <FaTimesCircle style={{ marginRight: '8px', position: 'relative', top: '2px' }} />}
+                    At least 8 characters.
+                  </div>
+                  <div style={{ color: /[0-9]/.test(user.password) ? 'green' : 'red' }}>
+                    {/[0-9]/.test(user.password) ? <FaCheckCircle style={{ marginRight: '8px', position: 'relative', top: '2px' }} /> : <FaTimesCircle style={{ marginRight: '8px', position: 'relative', top: '2px' }} />}
+                    At least one number.
+                  </div>
+                  <div style={{ color: /[\W_]/.test(user.password) ? 'green' : 'red' }}>
+                    {/[\W_]/.test(user.password) ? <FaCheckCircle style={{ marginRight: '8px', position: 'relative', top: '2px' }} /> : <FaTimesCircle style={{ marginRight: '8px', position: 'relative', top: '2px' }} />}
+                    At least one special character.
+                  </div>
+                </PasswordRules>
+              )}
               <VisibilityToggle onClick={togglePasswordVisibility}>
                 {passwordVisible ? <FaEye /> : <FaEyeSlash />}
               </VisibilityToggle>
             </InputGroup>
             
-            <LinkedLabel>
-            By signing up you agree to our {}
-              <Link to="/login" style={{ display: 'inline', color: '#0056b3'}}>
-                Terms
-              </Link>
-            , {}
-              <Link to="/login" style={{ display: 'inline', color: '#0056b3'}}>
-                Privacy Policy
-              </Link>
-            {} and {}
-
-            <Link to="/login" style={{ display: 'inline', color: '#0056b3'}}>
-                Cookies Policy
-            </Link>
-
-          </LinkedLabel>
-
-            {registrationSuccess && <SuccessMessage>
-                User signed up successfully!
-            </SuccessMessage>}
             <Button type="submit" disabled={!isFormValid}>
                 Sign Up
             </Button>
+
+            <LinkedLabel>
+              By signing up you agree to our {}
+                <Link to="/terms-of-service" style={{ display: 'inline', color: '#0056b3', fontWeight: 'bold'}}>
+                  Terms of Service
+                </Link>
+              {} and acknowledge our {}
+                <Link to="/privacy-policy" style={{ display: 'inline', color: '#0056b3', fontWeight: 'bold'}}>
+                  Privacy Policy
+                </Link>
+            </LinkedLabel>
         </Form>
 
         </Container>
