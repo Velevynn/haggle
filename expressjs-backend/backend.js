@@ -128,6 +128,27 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+async function collectionExists(collectionName) {
+  const collections = await db.listCollections();
+  return collections.some((col) => col.id === collectionName);
+}
+
+async function createUsersCollection() {
+  const collectionName = 'users';
+  if (!(await collectionExists(collectionName))) {
+    try {
+      await db.collection(collectionName).doc('sample').set({}); // Create a dummy document to force the creation of the collection
+      console.log('Users collection created successfully!');
+    } catch (error) {
+      console.error('Error creating users collection:', error);
+    }
+  } else {
+    console.log('Users collection already exists.');
+  }
+}
+
+// Call the function to create the collection
+createUsersCollection();
 
 app.post('/users/register', async (req, res) => {
   const { email, password, username, fullName, phoneNumber } = req.body;
