@@ -4,6 +4,8 @@ import styled, { css } from 'styled-components';
 import logoImage from '../assets/haggle-horizontal.png';
 import { FaEye, FaEyeSlash  } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
+import { auth } from './firebaseConfig';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 // Styled components
 const Container = styled.div`
@@ -157,20 +159,12 @@ function LoginPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      // Ensure the request body keys match the backend expectation
-      const requestBody = {
-        identifier: credentials.identifier, // Adjusted from 'identifier' to 'identifier'
-        password: credentials.password,
-      };
-      const response = await axios.post('http://localhost:6969/users/login', requestBody);
-      localStorage.setItem('token', response.data.token); // Store the token
-      navigate('/profile'); // Navigate to profile page
+      const userCredential = await signInWithEmailAndPassword(auth, credentials.identifier, credentials.password);
+      console.log('Logged in user:', userCredential.user);
+      navigate('/profile');
     } catch (error) {
-      if (error.response) {
-        setErrorMessage(error.response.data.error);
-      } else {
-        setErrorMessage('Login failed. Please try again.');
-      }
+      console.error('Error logging in:', error.message);
+      setErrorMessage(error.message);
     }
   };
 

@@ -4,6 +4,8 @@ import styled, { css } from 'styled-components';
 import { FaCheckCircle, FaTimesCircle, FaEye, FaEyeSlash  } from 'react-icons/fa';
 import logoImage from '../assets/haggle-horizontal.png';
 import { Link, useNavigate } from 'react-router-dom';
+import { auth } from './firebaseConfig';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 // Styled components
 const Container = styled.div`
@@ -172,7 +174,6 @@ function SignUpPage() {
 
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
-  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
@@ -239,49 +240,39 @@ function SignUpPage() {
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
-
-
+  
   const handleSubmit = async (event) => {
     event.preventDefault();
   
-    // Reset error message at the beginning of submission attempt
-    setErrorMessage('');
-
-    if (isFormValid) {
-      try {
-        // Pre-registration check for existing username, email, or phone number
-        const checkResponse = await axios.post('http://localhost:6969/users/check', {
-          email: user.email,
-          phoneNum: user.phoneNum,
-          username: user.username,
-        });
+    try {
+      // Attempt to register the user with Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(auth, user.email, user.password);
   
-        if (checkResponse.data.exists) {
-          // Display specific error message based on the conflict
-          setErrorMessage(`${checkResponse.data.message} already exists.`);
-        } else {
-          // Proceed with registration if no conflicts
-          const registerResponse = await axios.post('http://localhost:6969/users/register', user);
-          if (registerResponse.status === 201) {
-            setRegistrationSuccess(true);
-            navigate('/profile');
-          }
-        }
-      } catch (error) {
-        if (error.response) {
-          // Backend should provide specific error message in response
-          const message = error.response.data.error || error.response.data.message;
-          setErrorMessage(`Error:  ${message}`);
-        } else {
-          // Fallback error message for network issues or unexpected errors
-          setErrorMessage('An error occurred during registration. Please try again.');
-        }
-      }
-    } else {
-      setErrorMessage("Please ensure all fields are filled out correctly before submitting.");
+      // User is successfully registered, now let's create their profile in Firestore
+      const uid = userCredential.user.uid;
+  
+      // Prepare the user data to be stored in Firestore
+      const userProfile = {
+        uid,
+        username: user.username,
+        full_name: user.full_name,
+        email: user.email,
+        phoneNumber: user.phoneNum,
+        // Add any other relevant user information here
+      };
+  
+      // Make an API call to your backend to store the userProfile in Firestore
+      // Alternatively, directly use Firestore's SDK here if your security rules allow
+      await axios.post('/users/register', userProfile);
+  
+      // If everything goes well, navigate the user to the dashboard or send a success message
+      navigate('/profile'); // Example redirection after successful registration
+  
+    } catch (error) {
+      console.error('Error during the sign-up process:', error);
+      setErrorMessage(error.message); // Display an error message to the user
     }
   };
-  
 
   return (
     <>

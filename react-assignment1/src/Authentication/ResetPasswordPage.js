@@ -8,28 +8,14 @@ const Container = styled.div`
   max-width: 400px;
   margin: 0 auto;
   margin-top: 35px;
-  margin-bottom: 15px;
-  padding: 40px;
-  padding-bottom: 15px;
+  margin-bottom: 0px;
+  padding: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-`;
-
-const Header = styled.h2`
-  color: #666;
-  font-size: 24px;
-  text-align: center;
-`;
-
-const Description = styled.p`
-  color: #666;
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 20px;
 `;
 
 const InputGroup = styled.div`
@@ -75,12 +61,49 @@ const Input = styled.input`
   }
 `;
 
-const VisibilityToggle = styled.span`
-  position: absolute;
-  top: 20%;
-  right: 10px;
-  color: #666;
+const HeaderContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  justify-content: flex-start; // Adjusted justify-content
+`;
+
+
+const BackButton = styled.button`
+  padding: 6px 12px;
+  font-size: 14px;
+  background-color: white;
+  color: #999;
+  margin: 0;
+  margin-bottom: 60px;
+  margin-right: 0px;
+  border: none;
   cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  outline: none; /* Remove default outline style */
+
+  &:hover {
+    color: #138A3E;
+    background-color: white;
+    border: none;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px #138A3E; /* Add a box shadow to indicate focus without shifting */
+  }
+`;
+
+const Header = styled.h2`
+  color: #666;
+  font-size: 24px;
+  text-align: center;
+`;
+
+const Description = styled.p`
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 20px;
 `;
 
 const Button = styled.button`
@@ -91,17 +114,20 @@ const Button = styled.button`
   border-radius: 4px;
   cursor: pointer;
   margin-top: 20px;
-  transition: background-color 0.3s, box-shadow 0.3s;
+  transition: background-color 0.3s, box-shadow 0.3s; // Added box-shadow to the transition for a smooth effect
 
   &:hover {
-    background-color: #138A3E;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+    background-color: #138A3E; // Darker green on hover
+    border-color: #138A3E;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2); // Subtle shadow for depth, adjust as needed
   }
 
-  &:focus, &:active {
-    outline: none;
-    border-color: #16A44A;
-    box-shadow: 0 0 0 2px rgba(22, 164, 74, 0.5);
+  &:focus,
+  &:active {
+    background-color: #16A44A; // Keep the original green color
+    outline: none; // Removes the default focus outline
+    border-color: #16A44A; // Ensures the border color stays consistent
+    box-shadow: 0 0 0 2px rgba(22, 164, 74, 0.5); // Optional: Adds a custom focus glow
   }
 
   &:disabled {
@@ -109,6 +135,14 @@ const Button = styled.button`
     cursor: not-allowed;
     border-color: transparent;
   }
+`;
+
+const VisibilityToggle = styled.span`
+  position: absolute;
+  top: 20%;
+  right: 10px;
+  color: #666;
+  cursor: pointer;
 `;
 
 const PasswordRules = styled.div`
@@ -155,6 +189,10 @@ const ResetPasswordPage = () => {
     const handlePasswordFocus = () => setPasswordFocused(true);
     const handlePasswordBlur = () => setPasswordFocused(false);
 
+    const handleBack = () => {
+      navigate('/login');
+    };
+
     const handleSubmit = async (e) => {
       e.preventDefault();
   
@@ -178,7 +216,10 @@ const ResetPasswordPage = () => {
     return (
       <Container>
         <Form onSubmit={handleSubmit}>
-          <Header>Reset Password</Header>
+          <HeaderContainer>
+            <BackButton onClick={handleBack}>&#8592; Back</BackButton>
+            <Header>Reset Password</Header>
+          </HeaderContainer>
           <Description>Please enter your new password below.</Description>
           <InputGroup>
             <Input 

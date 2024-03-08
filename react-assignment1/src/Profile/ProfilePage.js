@@ -49,6 +49,7 @@ function ProfilePage() {
     full_name: '',
     email: '',
     phoneNumber: '',
+    password: ''
   });
 
   const navigate = useNavigate();

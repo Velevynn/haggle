@@ -76,6 +76,7 @@ const BackButton = styled.button`
   color: #999;
   margin: 0;
   margin-bottom: 60px;
+  margin-right: 0px;
   border: none;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
