@@ -139,7 +139,7 @@ const SignUpLabel = styled.label`
 `;
 
 function LoginPage() {
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const [credentials, setCredentials] = useState({ identifier: '', password: '' });
   const [isFormValid, setIsFormValid] = useState(false); // Define isFormValid state
   const [errorMessage, setErrorMessage] = useState(''); // Use this if you want to display error messages
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -157,7 +157,12 @@ function LoginPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post('http://localhost:6969/users/login', credentials);
+      // Ensure the request body keys match the backend expectation
+      const requestBody = {
+        identifier: credentials.identifier, // Adjusted from 'identifier' to 'identifier'
+        password: credentials.password,
+      };
+      const response = await axios.post('http://localhost:6969/users/login', requestBody);
       localStorage.setItem('token', response.data.token); // Store the token
       navigate('/profile'); // Navigate to profile page
     } catch (error) {
@@ -170,7 +175,7 @@ function LoginPage() {
   };
 
   useEffect(() => {
-    const isValid = credentials.username.length > 0 && credentials.password.length > 0;
+    const isValid = credentials.identifier.length > 0 && credentials.password.length > 0;
     setIsFormValid(isValid);
   }, [credentials]);
 
@@ -182,13 +187,13 @@ function LoginPage() {
           <InputGroup>
             <Input
               type="text"
-              name="username"
-              id="username"
-              value={credentials.username}
+              name="identifier"
+              id="identifier"
+              value={credentials.identifier}
               onChange={handleChange}
-              hasContent={credentials.username.length > 0}
+              hasContent={credentials.identifier.length > 0}
               required/>
-            <InputLabel htmlFor="username" hasContent={credentials.username.length > 0}>Username</InputLabel>
+            <InputLabel htmlFor="identifier" hasContent={credentials.identifier.length > 0}>Email, Phone, or Username</InputLabel>
           </InputGroup>
 
           <InputGroup>
