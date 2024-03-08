@@ -2,14 +2,17 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styled, { css } from 'styled-components';
 import logoImage from '../assets/haggle-horizontal.png';
+import { FaEye, FaEyeSlash  } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 
 // Styled components
 const Container = styled.div`
   max-width: 400px;
   margin: 0 auto;
-  margin-top: 100px;
+  margin-top: 35px;
+  margin-bottom: 15px;
   padding: 40px;
+  padding-bottom: 15px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 `;
 
@@ -20,7 +23,7 @@ const Form = styled.form`
 
 const InputGroup = styled.div`
   position: relative;
-  margin-bottom: 2px;
+  margin-bottom: 0px;
 `;
 
 const InputLabel = styled.label`
@@ -44,8 +47,9 @@ const InputLabel = styled.label`
 const Input = styled.input`
   position: absolute
   width: 100%;
-  padding-top: 14px;
-  padding-bottom: 6px;
+  padding-top: ${(props) => (props.hasContent ? "20px" : "12px")};
+  padding-bottom: ${(props) => (props.hasContent ? "8px" : "8px")}
+  line-height: ${props => props.hasContent ? "24px" : "18px"};
   height: 40px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -60,12 +64,21 @@ const Input = styled.input`
   }
 `;
 
+const VisibilityToggle = styled.span`
+  position: absolute;
+  top: 20%;
+  right: 10px;
+  color: #666;
+  cursor: pointer;
+`;
+
 const ForgotPasswordLabel= styled.label`
 color: #666;
-font-size: 11px;
-text-align: left;
-margin-top: 0px;
+font-size: 12px;
+text-align: center;
+margin-top: 20px;
 margin-bottom: 10px;
+font-weight: normal;
 `;
 
 const LinkedLabel = styled.label`
@@ -84,11 +97,20 @@ const Button = styled.button`
   border-radius: 4px;
   cursor: pointer;
   margin-top: 20px;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, box-shadow 0.3s; // Added box-shadow to the transition for a smooth effect
 
   &:hover {
-      background-color: #138A3E;
-      border-color: #16A44A;
+    background-color: #138A3E; // Darker green on hover
+    border-color: #138A3E;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2); // Subtle shadow for depth, adjust as needed
+  }
+
+  &:focus,
+  &:active {
+    background-color: #16A44A; // Keep the original green color
+    outline: none; // Removes the default focus outline
+    border-color: #16A44A; // Ensures the border color stays consistent
+    box-shadow: 0 0 0 2px rgba(22, 164, 74, 0.5); // Optional: Adds a custom focus glow
   }
 
   &:disabled {
@@ -120,11 +142,16 @@ function LoginPage() {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [isFormValid, setIsFormValid] = useState(false); // Define isFormValid state
   const [errorMessage, setErrorMessage] = useState(''); // Use this if you want to display error messages
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const navigate = useNavigate(); // make sure to import useNavigate from 'react-router-dom'
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setCredentials({ ...credentials, [name]: value });
+  };
+
+  const togglePasswordVisibility = () => {
+    setPasswordVisible(!passwordVisible);
   };
 
   const handleSubmit = async (event) => {
@@ -159,26 +186,25 @@ function LoginPage() {
               id="username"
               value={credentials.username}
               onChange={handleChange}
+              hasContent={credentials.username.length > 0}
               required/>
             <InputLabel htmlFor="username" hasContent={credentials.username.length > 0}>Username</InputLabel>
           </InputGroup>
 
           <InputGroup>
             <Input
-              type="password"
+              type={passwordVisible ? "text" : "password"}
               name="password"
               id="password"
               value={credentials.password}
               onChange={handleChange}
+              hasContent={credentials.password.length > 0}
               required/>
             <InputLabel htmlFor="password" hasContent={credentials.password.length > 0}>Password</InputLabel>
+            <VisibilityToggle onClick={togglePasswordVisibility}>
+                {passwordVisible ? <FaEye /> : <FaEyeSlash />}
+              </VisibilityToggle>
           </InputGroup>
-
-          <ForgotPasswordLabel>
-            <Link to="/forgot-password" style={{ display: 'inline', color: '#0056b3'}}>
-              Forgot your password?
-            </Link>
-          </ForgotPasswordLabel>
 
           <Button type="submit" disabled={!isFormValid}>
               Log in
@@ -194,13 +220,19 @@ function LoginPage() {
                   Privacy Policy
                 </Link>
             </LinkedLabel>
+
+            <ForgotPasswordLabel>
+            <Link to="/forgot-password" style={{ display: 'inline', color: '#0056b3'}}>
+              Forgot password?
+            </Link>
+          </ForgotPasswordLabel>
         </Form>
       </Container>
 
       <SignUpContainer>
         <SignUpLabel>
           Don't have an account? {}
-          <Link to="/signup" style={{ display: 'inline', color: '#0056b3'}}>
+          <Link to="/signup" style={{ display: 'inline', color: '#0056b3', fontWeight: 'bold'}}>
             Sign up
           </Link>
         </SignUpLabel>

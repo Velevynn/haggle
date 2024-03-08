@@ -28,6 +28,7 @@ const HeaderLabel = styled.label`
   color: #666;
   font-size: 17px;
   text-align: center;
+  margin-bottom: 20px;
 `;
 
 const LinkedLabel = styled.label`
@@ -77,8 +78,9 @@ const InputLabel = styled.label`
 const Input = styled.input`
   position: absolute
   width: 100%;
-  padding-top: 14px;
-  padding-bottom: 6px;
+  padding-top: ${(props) => (props.hasContent ? "20px" : "12px")};
+  padding-bottom: ${(props) => (props.hasContent ? "8px" : "8px")}
+  line-height: ${props => props.hasContent ? "22px" : "18px"};
   height: 40px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -109,11 +111,20 @@ const Button = styled.button`
   border-radius: 4px;
   cursor: pointer;
   margin-top: 20px;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, box-shadow 0.3s; // Added box-shadow to the transition for a smooth effect
 
   &:hover {
-      background-color: #138A3E;
-      border-color: #16A44A;
+    background-color: #138A3E; // Darker green on hover
+    border-color: #138A3E;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2); // Subtle shadow for depth, adjust as needed
+  }
+
+  &:focus,
+  &:active {
+    background-color: #16A44A; // Keep the original green color
+    outline: none; // Removes the default focus outline
+    border-color: #16A44A; // Ensures the border color stays consistent
+    box-shadow: 0 0 0 2px rgba(22, 164, 74, 0.5); // Optional: Adds a custom focus glow
   }
 
   &:disabled {
@@ -209,11 +220,20 @@ function SignUpPage() {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-
-    setUser({
-      ...user,
-      [name]: value,
-    });
+  
+    // If the input name is phoneNum, filter out non-numeric characters
+    if (name === "phoneNum") {
+      const filteredValue = value.replace(/[^\d]/g, ''); // Remove non-digits
+      setUser({
+        ...user,
+        [name]: filteredValue,
+      });
+    } else {
+      setUser({
+        ...user,
+        [name]: value,
+      });
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -314,6 +334,7 @@ function SignUpPage() {
                     value={user.username}
                     maxLength = "25"
                     onChange={handleChange}
+                    hasContent={user.username.length > 0}
                     required />
                 <InputLabel htmlFor="username" hasContent={user.username.length > 0}>Username</InputLabel>
                 <ValidationIcon isValid={isInputValid('username', user.username)}>
@@ -329,6 +350,7 @@ function SignUpPage() {
                     maxLength = "40"
                     value={user.full_name}
                     onChange={handleChange}
+                    hasContent={user.full_name.length > 0}
                     required />
                 <InputLabel htmlFor="full_name" hasContent={user.full_name.length > 0}>Full Name</InputLabel>
                 <ValidationIcon isValid={isInputValid('full_name', user.full_name)}>
@@ -346,21 +368,22 @@ function SignUpPage() {
                 onChange={handleChange}
                 onFocus={handlePasswordFocus}
                 onBlur={handlePasswordBlur}
+                hasContent={user.password.length > 0}
                 required />
               <InputLabel htmlFor="password" hasContent={user.password.length > 0}>Password</InputLabel>
               {passwordFocused && ( // Conditional rendering based on focus
                   <PasswordRules>
                   <div style={{ color: user.password.length >= 8 ? 'green' : 'red' }}>
                     {user.password.length >= 8 ? <FaCheckCircle style={{ marginRight: '8px', position: 'relative', top: '2px' }} /> : <FaTimesCircle style={{ marginRight: '8px', position: 'relative', top: '2px' }} />}
-                    At least 8 characters.
+                    At least 8 characters
                   </div>
                   <div style={{ color: /[0-9]/.test(user.password) ? 'green' : 'red' }}>
                     {/[0-9]/.test(user.password) ? <FaCheckCircle style={{ marginRight: '8px', position: 'relative', top: '2px' }} /> : <FaTimesCircle style={{ marginRight: '8px', position: 'relative', top: '2px' }} />}
-                    At least one number.
+                    At least one number
                   </div>
                   <div style={{ color: /[\W_]/.test(user.password) ? 'green' : 'red' }}>
                     {/[\W_]/.test(user.password) ? <FaCheckCircle style={{ marginRight: '8px', position: 'relative', top: '2px' }} /> : <FaTimesCircle style={{ marginRight: '8px', position: 'relative', top: '2px' }} />}
-                    At least one special character.
+                    At least one special character
                   </div>
                 </PasswordRules>
               )}

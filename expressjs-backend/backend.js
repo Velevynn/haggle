@@ -3,6 +3,9 @@ const mysql = require('mysql2/promise');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+const {google} = require('googleapis');
 
 const app = express();
 const PORT = 6969;
@@ -17,6 +20,46 @@ const dbConfig = {
     password: '',
     database: ''
 };
+
+// OAuth2 Client Setup
+const CLIENT_ID = '71122616560-7cmo4s6vqkii6m0dujcf1lhbqpl2pbkn.apps.googleusercontent.com';
+const CLIENT_SECRET = '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';
+const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
+const REFRESH_TOKEN = '1//04WwQjQJNXiaJCgYIARAAGAQSNwF-L9IrFFlckojRj8XLVxgwmE1-UfJZh8gBxvZYlzOqA0QkyKQ5VmpJPFjec9eTTMxdz8WvE7g';
+
+const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
+oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+
+async function sendEmail(recipient, subject, body) {
+  const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
+
+  const emailLines = [
+    `Content-Type: text/plain; charset="UTF-8"\n`,
+    `MIME-Version: 1.0\n`,
+    `Content-Transfer-Encoding: 7bit\n`,
+    `to: ${recipient}\n`,
+    `from: "NO-REPLY" noreply.haggle@gmail.com\n`,
+    `subject: ${subject}\n\n`,
+    `${body}`
+  ];
+
+  const email = emailLines.join('');
+  const encodedEmail = Buffer.from(email).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+  try {
+    const res = await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: {
+        raw: encodedEmail,
+      },
+    });
+
+    console.log(res.data);
+    return res.data;
+  } catch (error) {
+    console.error('Failed to send email:', error);
+  }
+}
 
 async function setupDatabase() {
   try {
@@ -35,8 +78,10 @@ async function setupDatabase() {
         password VARCHAR(255) NOT NULL, -- Consider hashing passwords for security
         email VARCHAR(255) NOT NULL UNIQUE, -- Ensure email is unique and not null
         phoneNumber VARCHAR(20) NOT NULL UNIQUE, -- Ensure phoneNumber is unique and not null
-        joinedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+        joinedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        resetPasswordToken VARCHAR(255), -- Field for storing the password reset token
+        resetPasswordExpires DATETIME -- Field for storing the expiration date of the token
+      );
     `);
     console.log("Table 'users' created or already exists.");
 
@@ -104,6 +149,72 @@ async function setupDatabase() {
     console.error("An error occurred:", error.message);
   }
 }
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'noreply.haggle@gmail.com',
+    pass: '@haggle1234!'
+  }
+});
+
+app.post('/users/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+
+  try {
+    const connection = await mysql.createConnection(dbConfig);
+    await connection.query("USE haggle_db");
+
+    // Verify if email exists
+    const [users] = await connection.execute('SELECT * FROM users WHERE email = ?', [email]);
+    if (users.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    const resetExpires = new Date(Date.now() + 3600000); // 1 hour from now
+
+    // Save the resetToken and expiration time to the user's record in the database
+    await connection.execute('UPDATE users SET resetPasswordToken = ?, resetPasswordExpires = ? WHERE email = ?', [resetToken, resetExpires, email]);
+
+    const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+    
+    // Now, use sendEmail function instead of nodemailer
+    await sendEmail(email, 'Password Reset Request', `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process within one hour of receiving it:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`);
+
+    res.json({ message: 'Reset link sent to your email address' });
+  } catch (error) {
+    console.error('Error in forgot-password route:', error);
+    res.status(500).json({ error: 'Failed to send forgot password email' });
+  }
+});
+
+app.post('/users/reset-password', async (req, res) => {
+  const { token, password } = req.body;
+
+  try {
+    const connection = await mysql.createConnection(dbConfig);
+    await connection.query("USE haggle_db");
+
+    // Verify token and its expiration
+    const [users] = await connection.execute('SELECT * FROM users WHERE resetPasswordToken = ? AND resetPasswordExpires > NOW()', [token]);
+    if (users.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired token' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await connection.execute('UPDATE users SET password = ?, resetPasswordToken = NULL, resetPasswordExpires = NULL WHERE userID = ?', [hashedPassword, users[0].userID]);
+
+    res.json({ message: 'Password has been reset successfully' });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ error: 'Failed to reset password' });
+  }
+});
 
 const verifyToken = (req, res, next) => {
   const bearerHeader = req.headers['authorization'];
