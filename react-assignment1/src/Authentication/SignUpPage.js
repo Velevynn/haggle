@@ -111,12 +111,11 @@ const Button = styled.button`
   border-radius: 4px;
   cursor: pointer;
   margin-top: 20px;
-  transition: background-color 0.3s, box-shadow 0.3s; // Added box-shadow to the transition for a smooth effect
+  transition: background-color 0.3s;
 
   &:hover {
-    background-color: #138A3E; // Darker green on hover
+    background-color: #138A3E;
     border-color: #138A3E;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2); // Subtle shadow for depth, adjust as needed
   }
 
   &:focus,
