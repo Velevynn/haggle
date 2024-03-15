@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./form.css";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 function Form() {
   const [listing, setListing] = useState({
@@ -101,7 +101,7 @@ function Form() {
           onChange={handleChange}
         />
         <label htmlFor="description">Description</label>
-        <input
+        <textarea
           type="text"
           name="description"
           id="description"
