@@ -150,14 +150,6 @@ async function setupDatabase() {
   }
 }
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'noreply.haggle@gmail.com',
-    pass: '@haggle1234!'
-  }
-});
-
 app.post('/users/forgot-password', async (req, res) => {
   const { email } = req.body;
 

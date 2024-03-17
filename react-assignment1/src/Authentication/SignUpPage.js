@@ -133,12 +133,6 @@ const Button = styled.button`
   }
 `;
 
-const SuccessMessage = styled.div`
-  color: green;
-  margin-top: 5px;
-  font-size: 12px;
-`;
-
 const PasswordRules = styled.div`
   background-color: #f7f7f7;
   padding: 10px;
@@ -171,7 +165,6 @@ function SignUpPage() {
 
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
-  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
@@ -262,7 +255,6 @@ function SignUpPage() {
           // Proceed with registration if no conflicts
           const registerResponse = await axios.post('http://localhost:6969/users/register', user);
           if (registerResponse.status === 201) {
-            setRegistrationSuccess(true);
             navigate('/profile');
           }
         }

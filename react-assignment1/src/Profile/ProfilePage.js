@@ -16,7 +16,7 @@ const ProfileImage = styled.img`
   width: 120px;
   height: 120px;
   border-radius: 60px;
-  margin: 20px auto;
+  margin: 20px;
   display: block;
 `;
 
@@ -34,7 +34,7 @@ const ProfileValue = styled.span`
 
 const SignOutButton = styled.button`
   padding: 10px 20px;
-  background-color: #f44336; /* Red */
+  background-color: #f44336;
   color: white;
   border: none;
   border-radius: 5px;
