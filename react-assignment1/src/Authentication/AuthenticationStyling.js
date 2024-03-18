@@ -151,7 +151,8 @@ export const ValidationIcon = styled.span`
   color: ${props => props.isValid ? '#138A3E' : 'red'};
 `;
 
-export const PasswordRules = styled.div`
+// also specific to ResetPasswordPage.js
+export const PasswordRules = styled.div`  
   background-color: #f7f7f7;
   padding: 10px;
   border-radius: 4px;
@@ -191,4 +192,55 @@ export const ProfileLabel = styled.span`
 
 export const ProfileValue = styled.span`
   margin-left: 10px;
+`;
+
+// Components specific for ForgotPasswordPage.js
+export const HeaderContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  justify-content: flex-start; // Adjusted justify-content
+`;
+
+
+export const BackButton = styled.button`
+  padding: 6px 12px;
+  font-size: 14px;
+  background-color: white;
+  color: #999;
+  border: none;
+  margin: 0;
+  margin-bottom: 60px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  outline: none; /* Remove default outline style */
+
+  &:hover {
+    color: #138A3E;
+    background-color: white;
+    border: none;
+  }
+
+  &:focus {
+    color: #138A3E;
+    box-shadow: 0 0 0 2px #138A3E;
+    background-color: white;
+    border: none;
+  }
+`;
+
+export const Description = styled.p`
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 20px;
+`;
+
+// Components specific to ResetPasswordPage.js
+export const Rule = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: ${props => props.isValid ? 'green' : 'red'};
 `;

@@ -65,9 +65,8 @@ function SignUpPage() {
   const handleChange = (event) => {
     const { name, value } = event.target;
   
-    // If the input name is phoneNum, filter out non-numeric characters
     if (name === "phoneNum") {
-      const filteredValue = value.replace(/[^\d]/g, ''); // Remove non-digits
+      const filteredValue = value.replace(/[^\d]/g, '');
       setUser({
         ...user,
         [name]: filteredValue,
@@ -214,7 +213,7 @@ function SignUpPage() {
                 hasContent={user.password.length > 0}
                 required />
               <InputLabel htmlFor="password" hasContent={user.password.length > 0}>Password</InputLabel>
-              {passwordFocused && ( // Conditional rendering based on focus
+              {passwordFocused && (
                   <PasswordRules>
                   <div style={{ color: user.password.length >= 8 ? 'green' : 'red' }}>
                     {user.password.length >= 8 ? <FaCheckCircle style={{ marginRight: '8px', position: 'relative', top: '2px' }} /> : <FaTimesCircle style={{ marginRight: '8px', position: 'relative', top: '2px' }} />}

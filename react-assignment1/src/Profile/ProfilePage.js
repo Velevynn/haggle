@@ -15,27 +15,26 @@ function ProfilePage() {
   const navigate = useNavigate();
 
   const handleSignOut = () => {
-    localStorage.removeItem('token'); // Remove the token from localStorage
-    navigate('/login'); // Navigate to the login page
+    localStorage.removeItem('token');
+    navigate('/login');
   };
 
   const handleDeleteProfile = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
-      navigate('/login'); // Redirect to login if there's no token
+      navigate('/login');
       return;
     }
 
     try {
-      // Send delete request to your backend
       await axios.delete(`http://localhost:6969/users/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
-      localStorage.removeItem('token'); // Remove the token from localStorage
-      navigate('/login'); // Navigate to the login page after successful deletion
+      localStorage.removeItem('token');
+      navigate('/login');
     } catch (error) {
       console.error('Failed to delete profile:', error);
     }
@@ -49,7 +48,7 @@ function ProfilePage() {
     const fetchUserProfile = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        navigate('/login'); // Redirect to login if there's no token
+        navigate('/login');
         return;
       }
 
