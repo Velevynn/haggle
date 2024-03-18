@@ -140,11 +140,9 @@ const Button = styled.button`
 function ForgotPasswordPage() {
   const [identifier, setIdentifier] = useState('');
   const [isEmailValid, setIsEmailValid] = useState(false);
-
   const navigate = useNavigate();
-
   const hasContent = identifier.length > 0;
-
+  
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (isEmailValid) {

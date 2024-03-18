@@ -3,9 +3,7 @@ const mysql = require('mysql2/promise');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
-const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-const {google} = require('googleapis');
 
 const app = express();
 const PORT = 6969;
@@ -20,46 +18,6 @@ const dbConfig = {
     password: '',
     database: ''
 };
-
-// OAuth2 Client Setup
-const CLIENT_ID = '71122616560-7cmo4s6vqkii6m0dujcf1lhbqpl2pbkn.apps.googleusercontent.com';
-const CLIENT_SECRET = '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';
-const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
-const REFRESH_TOKEN = '1//04WwQjQJNXiaJCgYIARAAGAQSNwF-L9IrFFlckojRj8XLVxgwmE1-UfJZh8gBxvZYlzOqA0QkyKQ5VmpJPFjec9eTTMxdz8WvE7g';
-
-const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
-oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
-
-async function sendEmail(recipient, subject, body) {
-  const gmail = google.gmail({version: 'v1', auth: oAuth2Client});
-
-  const emailLines = [
-    `Content-Type: text/plain; charset="UTF-8"\n`,
-    `MIME-Version: 1.0\n`,
-    `Content-Transfer-Encoding: 7bit\n`,
-    `to: ${recipient}\n`,
-    `from: "NO-REPLY" noreply.haggle@gmail.com\n`,
-    `subject: ${subject}\n\n`,
-    `${body}`
-  ];
-
-  const email = emailLines.join('');
-  const encodedEmail = Buffer.from(email).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-
-  try {
-    const res = await gmail.users.messages.send({
-      userId: 'me',
-      requestBody: {
-        raw: encodedEmail,
-      },
-    });
-
-    console.log(res.data);
-    return res.data;
-  } catch (error) {
-    console.error('Failed to send email:', error);
-  }
-}
 
 async function setupDatabase() {
   try {
@@ -174,10 +132,34 @@ app.post('/users/forgot-password', async (req, res) => {
     await connection.execute('UPDATE users SET resetPasswordToken = ?, resetPasswordExpires = ? WHERE email = ?', [resetToken, resetExpires, email]);
 
     const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
-    
-    // Now, use sendEmail function instead of nodemailer
-    await sendEmail(email, 'Password Reset Request', `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process within one hour of receiving it:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`);
 
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      service: 'outlook',
+      auth: {
+        user: 'no-reply.haggle@outlook.com',
+        pass: 'haggle1234!'
+      }
+    });
+  
+    const mailOptions = {
+      from: 'no-reply.haggle@outlook.com', // Replace with your email
+      to: email, // The user's email address
+      subject: 'Password Reset Request',
+      html: `<p>You requested a password reset. Click the link below to set a new password:</p><p><a href="${resetUrl}">Reset Password</a></p>`
+    };
+  
+    transporter.sendMail(mailOptions, function(error, info){
+      if (error) {
+        console.error('Error sending email:', error);
+        res.status(500).json({ error: 'Failed to send forgot password email' });
+      } else {
+        console.log('Email sent: ' + info.response);
+        res.json({ message: 'Reset link sent to your email address' });
+      }
+    });
+
+    
     res.json({ message: 'Reset link sent to your email address' });
   } catch (error) {
     console.error('Error in forgot-password route:', error);

@@ -5,6 +5,7 @@ import LoginPage from './Authentication/LoginPage';
 import ForgotPasswordPage from './Authentication/ForgotPasswordPage';
 import ResetPasswordPage from './Authentication/ResetPasswordPage';
 import ProfilePage from './Profile/ProfilePage.js';
+import ChangePasswordPage from './Authentication/ChangePasswordPage';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/change-password" element={<ChangePasswordPage />} />
           <Route path="/*" element={<SignUpPage />} />
         </Routes>
       </div>

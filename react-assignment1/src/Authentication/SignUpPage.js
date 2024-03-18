@@ -1,157 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import styled, { css } from 'styled-components';
 import { FaCheckCircle, FaTimesCircle, FaEye, FaEyeSlash  } from 'react-icons/fa';
 import logoImage from '../assets/haggle-horizontal.png';
 import { Link, useNavigate } from 'react-router-dom';
-
-// Styled components
-const Container = styled.div`
-  max-width: 400px;
-  margin: 0 auto;
-  margin-top: 35px;
-  padding: 40px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-`;
-
-const LoginContainer = styled.div`
-  max-width: 400px;
-  min-height: 60px;
-  margin: 10px auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-`;
-
-const HeaderLabel = styled.label`
-  color: #666;
-  font-size: 17px;
-  text-align: center;
-  margin-bottom: 20px;
-`;
-
-const LinkedLabel = styled.label`
-  color: #666;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 10px;
-  font-weight: normal;
-`;
-
-const LoginLabel = styled.label`
-  color: #666;
-  font-size: 14px;
-  text-align: center;
-  margin: 25px;
-  font-weight: normal;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-`;
-
-const InputGroup = styled.div`
-  position: relative;
-  margin-bottom: 0px;
-`;
-
-const InputLabel = styled.label`
-  position: absolute;
-  top: -15%;
-  left: 4%;
-  font-size: 14px;
-  color: #999;
-  transition: all 0.3s ease;
-  pointer-events: none;
-  font-weight: normal;
-
-  ${props => props.hasContent && css`
-    transform: translate(0%, -45%);
-    font-size: 10px;
-    font-weight: normal;
-    color: #999;
-  `}
-`;
-
-const Input = styled.input`
-  position: absolute
-  width: 100%;
-  padding-top: ${(props) => (props.hasContent ? "20px" : "12px")};
-  padding-bottom: ${(props) => (props.hasContent ? "8px" : "8px")}
-  line-height: ${props => props.hasContent ? "22px" : "18px"};
-  height: 40px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box;
-  font-size: 12px;
-  transition: border 0.3s, box-shadow 0.3s;
-
-  &:focus {
-    outline: none;
-    border-color: #007b00;
-    box-shadow: 0 0 8px rgba(0, 183, 0, 0.8);
-  }
-`;
-
-const ValidationIcon = styled.span`
-  position: absolute;
-  top: 65%;
-  right: 10px;
-  transform: translateY(-85%);
-  color: ${props => props.isValid ? '#138A3E' : 'red'};
-`;
-
-const Button = styled.button`
-  padding: 8px;
-  background-color: #16A44A;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 20px;
-  transition: background-color 0.3s;
-
-  &:hover {
-    background-color: #138A3E;
-    border-color: #138A3E;
-  }
-
-  &:focus,
-  &:active {
-    background-color: #16A44A; // Keep the original green color
-    outline: none; // Removes the default focus outline
-    border-color: #16A44A; // Ensures the border color stays consistent
-    box-shadow: 0 0 0 2px rgba(22, 164, 74, 0.5); // Optional: Adds a custom focus glow
-  }
-
-  &:disabled {
-    background-color: #8CCBA1;
-    cursor: not-allowed;
-    border-color: transparent;
-  }
-`;
-
-const PasswordRules = styled.div`
-  background-color: #f7f7f7;
-  padding: 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  color: #666;
-  position: absolute;
-  right: -350px;
-  top: 0px;
-  width: 300px;
-`;
-
-const VisibilityToggle = styled.span`
-  position: absolute;
-  top: 20%;
-  right: 10px;
-  color: #666;
-  cursor: pointer;
-`;
+import { Container, Form, InputGroup, Input, InputLabel, VisibilityToggle, Button, LinkedLabel, HeaderLabel, ValidationIcon, PasswordRules, BottomContainer, BottomLabel } from './AuthenticationStyling';
 
 
 function SignUpPage() {
@@ -400,14 +252,14 @@ function SignUpPage() {
         </Form>
 
         </Container>
-        <LoginContainer>
-          <LoginLabel>
+        <BottomContainer>
+          <BottomLabel>
             Already have an account? {}
-            <Link to="/login" style={{ display: 'inline', color: '#0056b3'}}>
+            <Link to="/login" style={{ display: 'inline', color: '#0056b3', fontWeight: 'bold'}}>
               Log in
             </Link>
-          </LoginLabel>
-      </LoginContainer>
+          </BottomLabel>
+      </BottomContainer>
       </>
   );
 }

@@ -1,47 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import styled from 'styled-components';
 import profileImagePlaceholder from '../assets/profile-placeholder.png';
 import { useNavigate } from 'react-router-dom';
-
-const Container = styled.div`
-  max-width: 600px;
-  margin: 0 auto;
-  margin-top: 50px;
-  padding: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-`;
-
-const ProfileImage = styled.img`
-  width: 120px;
-  height: 120px;
-  border-radius: 60px;
-  margin: 20px;
-  display: block;
-`;
-
-const ProfileField = styled.div`
-  margin: 10px 0;
-`;
-
-const ProfileLabel = styled.span`
-  font-weight: bold;
-`;
-
-const ProfileValue = styled.span`
-  margin-left: 10px;
-`;
-
-const SignOutButton = styled.button`
-  padding: 10px 20px;
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  display: block;
-  margin: 20px auto;
-`;
+import { Container, Button, ButtonContainer, ProfileImage, ProfileField, ProfileLabel, ProfileValue} from '../Authentication/AuthenticationStyling';
 
 function ProfilePage() {
   const [userProfile, setUserProfile] = useState({
@@ -56,6 +17,32 @@ function ProfilePage() {
   const handleSignOut = () => {
     localStorage.removeItem('token'); // Remove the token from localStorage
     navigate('/login'); // Navigate to the login page
+  };
+
+  const handleDeleteProfile = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login'); // Redirect to login if there's no token
+      return;
+    }
+
+    try {
+      // Send delete request to your backend
+      await axios.delete(`http://localhost:6969/users/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      localStorage.removeItem('token'); // Remove the token from localStorage
+      navigate('/login'); // Navigate to the login page after successful deletion
+    } catch (error) {
+      console.error('Failed to delete profile:', error);
+    }
+  };
+
+  const handleChangePassword = () => {
+    navigate('/change-password');
   };
 
   useEffect(() => {
@@ -93,7 +80,11 @@ function ProfilePage() {
           </ProfileField>
         ))}
       </form>
-      <SignOutButton onClick={handleSignOut}>Sign Out</SignOutButton>
+      <ButtonContainer>
+        <Button onClick={handleChangePassword}>Change Password</Button>
+        <Button onClick={handleSignOut}>Sign Out</Button>
+        <Button onClick={handleDeleteProfile}>Delete Profile</Button>
+      </ButtonContainer>
     </Container>
   );
 }
